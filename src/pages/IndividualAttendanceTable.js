@@ -19,8 +19,18 @@ function IndividualAttendanceTable() {
             category: 'Staff',
             designation: 'Engineer',
             records: [
-                { punchdate: '15-05-2025', punchin: '08:30', punchout: '16:30', workingduration: 480 },
-                { punchdate: '16-05-2025', punchin: '08:45', punchout: '16:15', workingduration: 450 }
+                { punchdate: '15-05-2025', punchtime: '08:30' },
+                { punchdate: '16-05-2025', punchtime: '08:45' },
+                { punchdate: '17-05-2025', punchtime: '08:50' },
+                { punchdate: '18-05-2025', punchtime: '08:40' },
+                { punchdate: '19-05-2025', punchtime: '08:35' },
+                { punchdate: '20-05-2025', punchtime: '08:25' },
+                { punchdate: '21-05-2025', punchtime: '08:20' },
+                { punchdate: '22-05-2025', punchtime: '08:15' },
+                { punchdate: '23-05-2025', punchtime: '08:10' },
+                { punchdate: '24-05-2025', punchtime: '08:05' },
+                { punchdate: '25-05-2025', punchtime: '08:00' },
+                { punchdate: '26-05-2025', punchtime: '07:55' }
             ]
         };
 
@@ -61,9 +71,7 @@ function IndividualAttendanceTable() {
                             <tr>
                                 <th>S.No</th>
                                 <th>Punch Date</th>
-                                <th>Punch In</th>
-                                <th>Punch Out</th>
-                                <th>Working Duration (mins)</th>
+                                <th>Punch Time</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,9 +79,7 @@ function IndividualAttendanceTable() {
                                 <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{rec.punchdate}</td>
-                                    <td>{rec.punchin}</td>
-                                    <td>{rec.punchout}</td>
-                                    <td>{rec.workingduration}</td>
+                                    <td>{rec.punchtime}</td>
                                 </tr>
                             ))}
                         </tbody>
