@@ -4,35 +4,59 @@ import AttendanceViewer from './pages/AttendanceViewer';
 import DepartmentSummary from './pages/DepartmentSummary';
 import IndividualAttendanceTable from './pages/IndividualAttendanceTable';
 import LoginPage from './pages/LoginPage';
+import axios from 'axios';
 
-function RequireAuth({ children }) {
-  const token = localStorage.getItem('token');
+axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.withCredentials = true;
+
+function RequireAuth({ isAuthenticated, children }) {
   const location = useLocation();
-
-  if (!token) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
   return children;
 }
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) setIsAuthenticated(true);
+    async function checkSession() {
+     
+      try {
+        const res = await axios.get('/check_session');
+        if(res.data.message = 'Valid token'){
+        
+          setIsAuthenticated(true);
+        }
+        else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error('Session check failed:', err);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+   
+    checkSession();
   }, []);
 
-  const handleLogin = (token) => {
-    localStorage.setItem('token', token);
-    setIsAuthenticated(true);
+  const handleLogout = () => {
+    axios.post('/logout')
+      .then(() => {
+        setIsAuthenticated(false);
+      })
+      .catch((err) => {
+        console.error('Logout error:', err);
+      });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-  };
+  if (loading) return <div className="text-center mt-5">Checking session...</div>;
 
   return (
     <Router>
@@ -52,11 +76,11 @@ function App() {
 
       <div className="container">
         <Routes>
-          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route
             path="/view"
             element={
-              <RequireAuth>
+              <RequireAuth isAuthenticated={isAuthenticated}>
                 <AttendanceViewer />
               </RequireAuth>
             }
@@ -64,7 +88,7 @@ function App() {
           <Route
             path="/summary"
             element={
-              <RequireAuth>
+              <RequireAuth isAuthenticated={isAuthenticated}>
                 <DepartmentSummary />
               </RequireAuth>
             }
@@ -72,14 +96,18 @@ function App() {
           <Route
             path="/individual"
             element={
-              <RequireAuth>
+              <RequireAuth isAuthenticated={isAuthenticated}>
                 <IndividualAttendanceTable />
               </RequireAuth>
             }
           />
           <Route
             path="/"
-            element={<Navigate to={isAuthenticated ? "/view" : "/login"} replace />}
+            element={
+              <RequireAuth isAuthenticated={isAuthenticated}>
+                <Navigate to="/view" replace />
+              </RequireAuth>
+            }
           />
         </Routes>
       </div>

@@ -1,38 +1,51 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, {  useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-function LoginPage({ onLogin }) {
-  const [formData, setFormData] = useState({ employeeId: '', password: '' });
+function LoginPage() {
+  const [formData, setFormData] = useState({ userId: '', password: '' });
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/view'; // fallback to /view if none
+  const from = location.state?.from?.pathname || '/view'; 
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    axios.post('/login', formData)
+      .then((response) => {
+        console.log('Login response:', response.data);
+        if (response.data.message === 'Logged in successfully') {
+         
+          navigate(from, { replace: true });
+        } else {
+          alert('Login failed');
+        }
+      })
+      .catch((error) => {
+        alert('An error occurred during login. Please try again.');
+      });
 
-    // Simulate login and token return
-    const dummyToken = 'dummy-jwt-token';
-    onLogin(dummyToken);
-
-    // Redirect to the original route
-    navigate(from, { replace: true });
   };
+
+  
 
   return (
     <div className="container mt-5" style={{ maxWidth: '400px' }}>
       <h3 className="mb-4">Employee Login</h3>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label className="form-label">Employee ID</label>
+          <label className="form-label">User ID</label>
           <input
             type="text"
-            name="employeeId"
-            value={formData.employeeId}
+            name="userId"
+            value={formData.userId}
             onChange={handleChange}
             className="form-control"
             required
