@@ -31,6 +31,14 @@ function DepartmentSummary() {
         deptSummaries();
     }, [deptSummaries]);
 
+    useEffect(() => {
+        const today = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        setFromDate(startOfMonth);
+        setToDate(endOfMonth);
+    }, []);
+
     return (
         <div className="container mt-4">
             <h2 className="text-center mb-4">Department-wise Summary</h2>
