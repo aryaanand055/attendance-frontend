@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../axios';
 
 function IndividualAttendanceTable() {
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
@@ -8,6 +8,8 @@ function IndividualAttendanceTable() {
     const [records, setRecords] = useState([]);
     const [columnsToShow, setColumnsToShow] = useState([]);
     const [error, setError] = useState('');
+    const [total_late_mins, setTotalLateMins] = useState(0);
+    const [marked_days, setMarkedDays] = useState(0);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,10 +24,10 @@ function IndividualAttendanceTable() {
             const res = await axios.post('/individual_data', {
                 start_date: formData.startDate,
                 end_date: formData.endDate,
-                id: formData.employeeId
+                id: formData.employeeId 
             });
 
-            const { data, timing } = res.data;
+            const { absent_marked,total_late_mins , data, timing } = res.data;
 
             const employee = data[0] || {};
 
@@ -33,15 +35,16 @@ function IndividualAttendanceTable() {
                 name: employee.name,
                 category: employee.category,
                 designation: employee.dept,
-                total_late_mins: employee.total_late_mins || 0,
-                marked_days: employee.marked || 0
+                
+                
             });
 
 
             
             const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
             const visibleCols = allColumns.filter(col => timing.some(row => row[col]));
-
+            setMarkedDays(absent_marked);
+            setTotalLateMins(total_late_mins);
             setColumnsToShow(visibleCols);
             setRecords(timing);
             setSubmitted(true);
@@ -69,6 +72,7 @@ function IndividualAttendanceTable() {
                     </div>
                 </div>
                 <button type="submit" className="btn btn-primary">Get Records</button>
+               
             </form>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -78,8 +82,8 @@ function IndividualAttendanceTable() {
                     <h4 className="mb-3">Attendance Records for {employeeInfo.name}</h4>
                     <p><strong>Category:</strong> {employeeInfo.category}</p>
                     <p><strong>Designation:</strong> {employeeInfo.designation}</p>
-                    <p><strong>Total Late Minutes:</strong> {employeeInfo.total_late_mins}</p>
-                    <p><strong>Marked Days:</strong> {employeeInfo.marked_days}</p>
+                    <p><strong>Total Late Mins </strong>{total_late_mins}</p>
+                    <p><strong>Marked Days:</strong> {marked_days}</p>
                     
                     <table className="table table-bordered table-striped mt-3">
                         <thead className="table-dark">
@@ -89,7 +93,7 @@ function IndividualAttendanceTable() {
                                 {columnsToShow.map((col, i) => (
                                     <th key={i}>{col}</th>
                                 ))}
-                                <th>Late Minutes</th>
+                                <th>Late Mins</th>
                                 <th>Working Hours</th>
                             </tr>
                         </thead>
@@ -98,6 +102,7 @@ function IndividualAttendanceTable() {
                                 <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{rec.date}</td>
+                                    
                                     {columnsToShow.map((col, i) => (
                                         <td key={i}>{rec[col] || '-'}</td>
                                     ))}

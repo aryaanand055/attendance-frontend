@@ -1,62 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import AttendanceViewer from './pages/AttendanceViewer';
 import DepartmentSummary from './pages/DepartmentSummary';
 import IndividualAttendanceTable from './pages/IndividualAttendanceTable';
 import LoginPage from './pages/LoginPage';
-import axios from 'axios';
+import { useAuth, AuthProvider } from './auth/authProvider'; 
 
-axios.defaults.baseURL = 'http://localhost:5000/api';
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.defaults.headers.common['Accept'] = 'application/json';
-axios.defaults.withCredentials = true;
-
-function RequireAuth({ isAuthenticated, children }) {
+function RequireAuth({ children }) {
+  const { isAuthenticated } = useAuth(); 
   const location = useLocation();
+
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   return children;
 }
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function checkSession() {
-     
-      try {
-        const res = await axios.get('/check_session');
-        if(res.data.message = 'Valid token'){
-        
-          setIsAuthenticated(true);
-        }
-        else {
-          setIsAuthenticated(false);
-        }
-      } catch (err) {
-        console.error('Session check failed:', err);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    }
-   
-    checkSession();
-  }, []);
-
-  const handleLogout = () => {
-    axios.post('/logout')
-      .then(() => {
-        setIsAuthenticated(false);
-      })
-      .catch((err) => {
-        console.error('Logout error:', err);
-      });
-  };
-
-  if (loading) return <div className="text-center mt-5">Checking session...</div>;
+function AppContent() {
+  const { isAuthenticated, logout } = useAuth(); 
 
   return (
     <Router>
@@ -68,7 +29,7 @@ function App() {
               <Link className="nav-link" to="/view">Live Records</Link>
               <Link className="nav-link" to="/summary">Department Summary</Link>
               <Link className="nav-link" to="/individual">Individual Data</Link>
-              <button className="btn btn-sm btn-outline-light ms-3" onClick={handleLogout}>Logout</button>
+              <button className="btn btn-sm btn-outline-light ms-3" onClick={logout}>Logout</button>
             </div>
           )}
         </div>
@@ -80,7 +41,7 @@ function App() {
           <Route
             path="/view"
             element={
-              <RequireAuth isAuthenticated={isAuthenticated}>
+              <RequireAuth>
                 <AttendanceViewer />
               </RequireAuth>
             }
@@ -88,7 +49,7 @@ function App() {
           <Route
             path="/summary"
             element={
-              <RequireAuth isAuthenticated={isAuthenticated}>
+              <RequireAuth>
                 <DepartmentSummary />
               </RequireAuth>
             }
@@ -96,7 +57,7 @@ function App() {
           <Route
             path="/individual"
             element={
-              <RequireAuth isAuthenticated={isAuthenticated}>
+              <RequireAuth>
                 <IndividualAttendanceTable />
               </RequireAuth>
             }
@@ -104,7 +65,7 @@ function App() {
           <Route
             path="/"
             element={
-              <RequireAuth isAuthenticated={isAuthenticated}>
+              <RequireAuth>
                 <Navigate to="/view" replace />
               </RequireAuth>
             }
@@ -112,6 +73,14 @@ function App() {
         </Routes>
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

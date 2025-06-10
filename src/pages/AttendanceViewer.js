@@ -1,29 +1,39 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios from '../axios';
 
 function AttendanceViewer() {
   const [selectedDate, setSelectedDate] = useState("");
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+  const [columnsToShow, setColumnsToShow] = useState([]);
 
   const getLogs = useCallback(async (date) => {
     if (!date) return;
-
+  
     setLoading(true);
     setError(null);
     try {
       const response = await axios.post('/attendance_viewer', { date });
-      setLogs(response.data || []);
+      const fetchedLogs = response.data || [];
+      setLogs(fetchedLogs);
+  
+      const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
+      const visibleCols = allColumns.filter(col => 
+        fetchedLogs.some(row => row[col])
+      );
+      setColumnsToShow(visibleCols);
+  
     } catch (error) {
       console.error('Error fetching logs:', error);
       setError("Failed to load attendance data");
       setLogs([]);
+      setColumnsToShow([]);
     } finally {
       setLoading(false);
     }
   }, []);
-
+  
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setSelectedDate(today);
@@ -57,14 +67,9 @@ function AttendanceViewer() {
         <tr>
             <th>Staff ID</th>
             <th>Name</th>
-            {[1, 2, 3].filter(i =>
-                logs.some(log => log[`IN${i}`] || log[`OUT${i}`])
-            ).map(i => (
-                <React.Fragment key={i}>
-                <th>IN{i}</th>
-                <th>OUT{i}</th>
-                </React.Fragment>
-            ))}
+            {columnsToShow.map((col, i) => (
+                                    <th key={i}>{col}</th>
+                                ))}
             </tr>
         </thead>
         <tbody>
@@ -74,14 +79,10 @@ function AttendanceViewer() {
                   <td>{log.staff_id}</td>
                   <td>{log.name}</td>
                  
-                  {[1, 2, 3]
-                    .filter(i => log[`IN${i}`] || log[`OUT${i}`])
-                    .map(i => (
-                    <React.Fragment key={i}>
-                        <td>{log[`IN${i}`]}</td>
-                        <td>{log[`OUT${i}`]}</td>
-                    </React.Fragment>
-                    ))}
+                  {columnsToShow.map((col, i) => (
+                                        <td key={i}>{log[col] || '-'}</td>
+                                    ))}
+                   
                 </tr>
               ))
           ) : (

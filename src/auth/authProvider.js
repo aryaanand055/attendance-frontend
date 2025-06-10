@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (credentials) => {
-    const res = await axios.post('/login', credentials);
+    const res = await axios.post('/login',credentials);
     if (res.data.message === 'Logged in successfully') {
       setIsAuthenticated(true);
       return true;

@@ -1,43 +1,59 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios from '../axios';
 
 function DepartmentSummary() {
     const [selectedDept, setSelectedDept] = useState('');
-    const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
     const [summaryData, setSummaryData] = useState({});
-
+    const [date, setDate] = useState({}); 
     const departments = ["ALL", "CSE", "Mechanical", "ECE"]; 
 
-    const deptSummaries = useCallback(async () => {
-        if (!selectedDept || !fromDate || !toDate) return;
+    const fetchDeptSummary = useCallback(async () => {
+        if (!selectedDept) return;
 
         try {
-            console.log('Sending:', { selectedDept, fromDate, toDate });
-
+            console.log('Requesting summary for:', selectedDept);
             const response = await axios.post('/dept_summary', {
-                dept: selectedDept,
-                start_date: fromDate,
-                end_date: toDate,
+                dept: selectedDept
             });
-            setSummaryData(response.data || {});
+
+            setSummaryData(response.data.data || {});
+            setDate(response.data.date || {});
+
         } catch (error) {
             console.error('Error fetching department summary:', error);
             setSummaryData({});
         }
-    }, [selectedDept, fromDate, toDate]);
+    }, [selectedDept]);
 
     useEffect(() => {
-        deptSummaries();
-    }, [deptSummaries]);
+        fetchDeptSummary();
+    }, [fetchDeptSummary]);
 
-    useEffect(() => {
-        const today = new Date();
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-        setFromDate(startOfMonth);
-        setToDate(endOfMonth);
-    }, []);
+    const renderTable = (deptName, employees) => (
+        <div key={deptName} className="mt-4">
+            <h3>{deptName} Department</h3>
+            <table className="table table-bordered table-striped mt-2">
+                <thead className="thead-dark">
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Employee ID</th>
+                        <th>Cumulative Summary</th>
+                        <th>Leaves Detected</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {employees.map((emp, index) => (
+                        <tr key={`${emp.staff_id}-${index}`}>
+                            <td>{emp.name}</td>
+                            <td>{emp.staff_id}</td>
+                            <td>{emp.summary}</td>
+                            <td>{emp.leaves}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 
     return (
         <div className="container mt-4">
@@ -45,8 +61,9 @@ function DepartmentSummary() {
 
             <div className="row mb-3">
                 <div className="col-md-4 mb-2">
-                    <label>Department:</label>
+                    <label htmlFor="departmentSelect">Department:</label>
                     <select
+                        id="departmentSelect"
                         className="form-control"
                         value={selectedDept}
                         onChange={(e) => setSelectedDept(e.target.value)}
@@ -59,57 +76,45 @@ function DepartmentSummary() {
                         ))}
                     </select>
                 </div>
-
-                <div className="col-md-4 mb-2">
-                    <label>From Date:</label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                    />
-                </div>
-
-                <div className="col-md-4 mb-2">
-                    <label>To Date:</label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                    />
-                </div>
+                
             </div>
-
-            {selectedDept && fromDate && toDate && Object.keys(summaryData).length > 0 && (
+            
+           
+            {selectedDept && Object.keys(summaryData).length > 0 ? (
+                
                 <>
-                    {Object.entries(summaryData).map(([deptName, employees]) => (
-                        <div key={deptName} className="mt-4">
-                            <h3>{deptName} Department</h3>
-                            <table className="table table-bordered table-striped mt-2">
-                                <thead className="thead-dark">
-                                    <tr>
-                                        <th>Employee Name</th>
-                                        <th>Employee ID</th>
-                                        <th>Cumulative Summary</th>
-                                        <th>Leaves Detected</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {employees.map((emp, index) => (
-                                        <tr key={`${emp.staff_id}-${index}`}>
-                                            <td>{emp.name}</td>
-                                            <td>{emp.staff_id}</td>
-                                            <td>{emp.summary}</td>
-                                            <td>{emp.leaves}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                   <div className="col-md-4 mb-2">
+                            <div className="date-range-container d-flex align-items-center gap-2">
+                                <label className="date-label">From:</label>
+                                <input
+                                    type="text"
+                                    id="dateDisplay1"
+                                    className="form-control date-input"
+                                    value={date[0]?.slice(0, 10) || 'No date'}
+                                    readOnly
+                                />
+                                <label className="date-label">To:</label>
+                                <input
+                                    type="text"
+                                    id="dateDisplay2"
+                                    className="form-control date-input"
+                                    value={date[1]?.slice(0, 10) || 'No date'}
+                                    readOnly
+                                />
+                            </div>
                         </div>
-                    ))}
+
+                       
+                            {Object.entries(summaryData).map(([deptName, employees]) =>
+                                renderTable(deptName, employees)
+                            )}
+
                 </>
-            )}
+            ) : selectedDept && Object.keys(summaryData).length === 0 ? (
+                <div className="alert alert-info mt-3">
+                    No data available for the selected department.
+                </div>
+            ) : null}
         </div>
     );
 }

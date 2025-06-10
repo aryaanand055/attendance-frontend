@@ -1,40 +1,33 @@
-import axios from 'axios';
-import React, {  useState } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../auth/authProvider'; // Import the useAuth hook
 
 function LoginPage() {
   const [formData, setFormData] = useState({ userId: '', password: '' });
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth(); // Access the login function from AuthProvider
 
-  const from = location.state?.from?.pathname || '/view'; 
-
+  const from = location.state?.from?.pathname || '/view';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  
-  
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post('/login', formData)
-      .then((response) => {
-        console.log('Login response:', response.data);
-        if (response.data.message === 'Logged in successfully') {
-         
-          navigate(from, { replace: true });
-        } else {
-          alert('Login failed');
-        }
-      })
-      .catch((error) => {
-        alert('An error occurred during login. Please try again.');
-      });
-
+    try {
+      const success = await login(formData); // Use the login function
+      if (success) {
+        navigate(from, { replace: true });
+      } else {
+        alert('Login failed');
+      }
+    } catch (error) {
+      alert('An error occurred during login. Please try again.');
+    }
   };
-
-  
 
   return (
     <div className="container mt-5" style={{ maxWidth: '400px' }}>

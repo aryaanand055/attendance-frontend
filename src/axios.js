@@ -9,4 +9,13 @@ const instance = axios.create({
   },
 });
 
+instance.interceptors.response.use(
+  (response) => response, 
+  (error) => {
+    console.error('Axios error:', error.response || error.message); // Log the error for debugging
+    return Promise.reject(error);
+  }
+);
+
+
 export default instance;
