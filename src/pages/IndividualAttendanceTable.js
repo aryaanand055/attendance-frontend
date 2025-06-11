@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from '../axios';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function IndividualAttendanceTable() {
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
@@ -35,8 +37,6 @@ function IndividualAttendanceTable() {
                 name: employee.name,
                 category: employee.category,
                 designation: employee.dept,
-
-
             });
             const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
             const visibleCols = allColumns.filter(col => timing.some(row => row[col]));
@@ -48,6 +48,35 @@ function IndividualAttendanceTable() {
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to fetch data.');
         }
+    };
+
+    const handleSaveAsPDF = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text('Individual Attendance Report', 14, 16);
+        doc.setFontSize(12);
+        doc.text(`Name: ${employeeInfo.name || ''}`, 14, 26);
+        doc.text(`Category: ${employeeInfo.category || ''}`, 14, 34);
+        doc.text(`Designation: ${employeeInfo.designation || ''}`, 14, 42);
+        doc.text(`Total Late Mins: ${total_late_mins}`, 14, 50);
+        doc.text(`Marked Days: ${marked_days}`, 14, 58);
+
+        const tableColumn = ['S.No', 'Date', ...columnsToShow, 'Late Mins', 'Working Hours'];
+        const tableRows = records.map((rec, idx) => [
+            idx + 1,
+            rec.date,
+            ...columnsToShow.map(col => rec[col] || '-'),
+            rec.late_mins,
+            rec.working_hours
+        ]);
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 65,
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [49, 58, 98] },
+        });
+        doc.save(`attendance_${employeeInfo.name || 'employee'}.pdf`);
     };
 
     React.useEffect(() => {
@@ -95,7 +124,9 @@ function IndividualAttendanceTable() {
                     <p><strong>Designation:</strong> {employeeInfo.designation}</p>
                     <p><strong>Total Late Mins </strong>{total_late_mins}</p>
                     <p><strong>Marked Days:</strong> {marked_days}</p>
-
+                    <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
+                        Save as PDF
+                    </button>
                     <table className="table table-bordered table-striped mt-3">
                         <thead className="table-dark">
                             <tr>
