@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/authProvider'; // Import the useAuth hook
+import { useAlert } from '../components/AlertProvider';
 
 function LoginPage() {
   const [formData, setFormData] = useState({ userId: '', password: '' });
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth(); // Access the login function from AuthProvider
+  const { login } = useAuth();
+  const { showAlert } = useAlert();
 
   const from = location.state?.from?.pathname || '/view';
 
@@ -19,14 +21,15 @@ function LoginPage() {
     try {
       const result = await login(formData);
       if (result.success) {
+        showAlert('Login successful!', 'success');
         navigate(from, { replace: true });
       } else if (result.reason === 'invalid_credentials') {
-        alert('Invalid User ID or Password');
+        showAlert('Invalid User ID or Password', 'error');
       } else {
-        alert('An error occurred during login. Please try again.');
+        showAlert('An error occurred during login. Please try again.', 'error');
       }
     } catch (error) {
-      alert('An error occurred during login. Please try again.');
+      showAlert('An error occurred during login. Please try again.', 'error');
     }
   };
 

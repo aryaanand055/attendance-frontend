@@ -4,8 +4,13 @@ import axios from '../axios';
 function DepartmentSummary() {
     const [selectedDept, setSelectedDept] = useState('');
     const [summaryData, setSummaryData] = useState({});
-    const [date, setDate] = useState({}); 
-    const departments = ["ALL", "CSE", "Mechanical", "ECE"]; 
+    const [date, setDate] = useState({});
+    const departments = ["ALL", "CSE", "Mechanical", "ECE"];
+
+    React.useEffect(() => {
+        const defaultDept = "ALL";
+        setSelectedDept(defaultDept);
+    }, []);
 
     const fetchDeptSummary = useCallback(async () => {
         if (!selectedDept) return;
@@ -76,38 +81,38 @@ function DepartmentSummary() {
                         ))}
                     </select>
                 </div>
-                
-            </div>
-            
-           
-            {selectedDept && Object.keys(summaryData).length > 0 ? (
-                
-                <>
-                   <div className="col-md-4 mb-2">
-                            <div className="date-range-container d-flex align-items-center gap-2">
-                                <label className="date-label">From:</label>
-                                <input
-                                    type="text"
-                                    id="dateDisplay1"
-                                    className="form-control date-input"
-                                    value={date[0]?.slice(0, 10) || 'No date'}
-                                    readOnly
-                                />
-                                <label className="date-label">To:</label>
-                                <input
-                                    type="text"
-                                    id="dateDisplay2"
-                                    className="form-control date-input"
-                                    value={date[1]?.slice(0, 10) || 'No date'}
-                                    readOnly
-                                />
-                            </div>
-                        </div>
 
-                       
-                            {Object.entries(summaryData).map(([deptName, employees]) =>
-                                renderTable(deptName, employees)
-                            )}
+            </div>
+
+
+            {selectedDept && Object.keys(summaryData).length > 0 ? (
+
+                <>
+                    <div className="col-md-4 mb-2">
+                        <div className="date-range-container d-flex align-items-center gap-2">
+                            <label className="date-label">From:</label>
+                            <input
+                                type="text"
+                                id="dateDisplay1"
+                                className="form-control date-input"
+                                value={date[0]?.slice(0, 10) || 'No date'}
+                                readOnly
+                            />
+                            <label className="date-label">To:</label>
+                            <input
+                                type="text"
+                                id="dateDisplay2"
+                                className="form-control date-input"
+                                value={date[1]?.slice(0, 10) || 'No date'}
+                                readOnly
+                            />
+                        </div>
+                    </div>
+
+
+                    {Object.entries(summaryData).map(([deptName, employees]) =>
+                        renderTable(deptName, employees)
+                    )}
 
                 </>
             ) : selectedDept && Object.keys(summaryData).length === 0 ? (

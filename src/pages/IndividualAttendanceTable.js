@@ -4,7 +4,7 @@ import axios from '../axios';
 function IndividualAttendanceTable() {
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
     const [submitted, setSubmitted] = useState(false);
-    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', designation: '',total_late_mins:'',marked_days:'' });
+    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', designation: '', total_late_mins: '', marked_days: '' });
     const [records, setRecords] = useState([]);
     const [columnsToShow, setColumnsToShow] = useState([]);
     const [error, setError] = useState('');
@@ -24,10 +24,10 @@ function IndividualAttendanceTable() {
             const res = await axios.post('/individual_data', {
                 start_date: formData.startDate,
                 end_date: formData.endDate,
-                id: formData.employeeId 
+                id: formData.employeeId
             });
 
-            const { absent_marked,total_late_mins , data, timing } = res.data;
+            const { absent_marked, total_late_mins, data, timing } = res.data;
 
             const employee = data[0] || {};
 
@@ -35,12 +35,9 @@ function IndividualAttendanceTable() {
                 name: employee.name,
                 category: employee.category,
                 designation: employee.dept,
-                
-                
+
+
             });
-
-
-            
             const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
             const visibleCols = allColumns.filter(col => timing.some(row => row[col]));
             setMarkedDays(absent_marked);
@@ -52,6 +49,20 @@ function IndividualAttendanceTable() {
             setError(err.response?.data?.error || 'Failed to fetch data.');
         }
     };
+
+    React.useEffect(() => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const startDate = `${yyyy}-${mm}-01`;
+        const lastDay = new Date(yyyy, today.getMonth() + 1, 0).getDate();
+        const endDate = `${yyyy}-${mm}-${String(lastDay).padStart(2, '0')}`;
+        setFormData(prev => ({
+            ...prev,
+            startDate,
+            endDate
+        }));
+    }, []);
 
     return (
         <div className="container mt-4">
@@ -72,7 +83,7 @@ function IndividualAttendanceTable() {
                     </div>
                 </div>
                 <button type="submit" className="btn btn-primary">Get Records</button>
-               
+
             </form>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -84,7 +95,7 @@ function IndividualAttendanceTable() {
                     <p><strong>Designation:</strong> {employeeInfo.designation}</p>
                     <p><strong>Total Late Mins </strong>{total_late_mins}</p>
                     <p><strong>Marked Days:</strong> {marked_days}</p>
-                    
+
                     <table className="table table-bordered table-striped mt-3">
                         <thead className="table-dark">
                             <tr>
@@ -102,7 +113,7 @@ function IndividualAttendanceTable() {
                                 <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{rec.date}</td>
-                                    
+
                                     {columnsToShow.map((col, i) => (
                                         <td key={i}>{rec[col] || '-'}</td>
                                     ))}

@@ -1,0 +1,35 @@
+.custom-alert {
+    position: fixed;
+    top: 30px;
+    right: -400px;
+    min-width: 250px;
+    padding: 16px 24px;
+    background: #f44336;
+    color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    opacity: 0;
+    transition: right 0.5s cubic-bezier(.68, -0.55, .27, 1.55), opacity 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.custom-alert.show {
+    right: 30px;
+    opacity: 1;
+}
+
+.custom-alert.success {
+    background: #4caf50;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    margin-left: 16px;
+    cursor: pointer;
+}
