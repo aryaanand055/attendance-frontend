@@ -31,17 +31,29 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (credentials) => {
-    const res = await axios.post('/login',credentials);
-    if (res.data.message === 'Logged in successfully') {
-      setIsAuthenticated(true);
-      return true;
+    try {
+      const res = await axios.post('/login', credentials);
+      if (res.data.message === 'Logged in successfully') {
+        setIsAuthenticated(true);
+        return { success: true };
+      }
+      return { success: false, reason: 'unknown' };
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        return { success: false, reason: 'invalid_credentials' };
+      }
+      return { success: false, reason: 'network' };
     }
-    return false;
   };
 
   const logout = async () => {
-    await axios.post('/logout');
-    setIsAuthenticated(false);
+    try {
+      await axios.post('/logout');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      setIsAuthenticated(false);
+    }
   };
 
   const value = {

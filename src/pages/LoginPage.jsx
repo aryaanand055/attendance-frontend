@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/authProvider'; // Import the useAuth hook
@@ -18,11 +17,13 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const success = await login(formData); // Use the login function
-      if (success) {
+      const result = await login(formData);
+      if (result.success) {
         navigate(from, { replace: true });
+      } else if (result.reason === 'invalid_credentials') {
+        alert('Invalid User ID or Password');
       } else {
-        alert('Login failed');
+        alert('An error occurred during login. Please try again.');
       }
     } catch (error) {
       alert('An error occurred during login. Please try again.');
