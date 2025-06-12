@@ -52,7 +52,10 @@ return (
     <div className="glassy-navbar-wrapper d-flex justify-content-center mt-3">
       <nav className="navbar navbar-expand-lg glassy-navbar">
         <div className="container-fluid">
-          <a className="navbar-brand fw-bold mx-3" href="/" title="Dashboard">Attendance App</a>
+          <a className="navbar-brand d-flex align-items-center fw-bold mx-3" href="/" title="Dashboard">
+            <img src="https://psgitech.ac.in/assets/images/favicon.png" alt="Logo" style={{ height: '32px', width: '32px', marginRight: '10px' }} />
+            Attendance App
+          </a>
           <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span className="navbar-toggler-icon"></span>
           </button>

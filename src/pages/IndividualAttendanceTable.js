@@ -6,7 +6,7 @@ import autoTable from 'jspdf-autotable';
 function IndividualAttendanceTable() {
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
     const [submitted, setSubmitted] = useState(false);
-    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', designation: '', total_late_mins: '', marked_days: '' });
+    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', department: '', total_late_mins: '', marked_days: '' });
     const [records, setRecords] = useState([]);
     const [columnsToShow, setColumnsToShow] = useState([]);
     const [error, setError] = useState('');
@@ -36,7 +36,7 @@ function IndividualAttendanceTable() {
             setEmployeeInfo({
                 name: employee.name,
                 category: employee.category,
-                designation: employee.dept,
+                department: employee.dept,
             });
             const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
             const visibleCols = allColumns.filter(col => timing.some(row => row[col]));
@@ -57,7 +57,7 @@ function IndividualAttendanceTable() {
         doc.setFontSize(12);
         doc.text(`Name: ${employeeInfo.name || ''}`, 14, 26);
         doc.text(`Category: ${employeeInfo.category || ''}`, 14, 34);
-        doc.text(`Designation: ${employeeInfo.designation || ''}`, 14, 42);
+        doc.text(`Department: ${employeeInfo.department || ''}`, 14, 42);
         doc.text(`Total Late Mins: ${total_late_mins}`, 14, 50);
         doc.text(`Marked Days: ${marked_days}`, 14, 58);
 
@@ -121,7 +121,7 @@ function IndividualAttendanceTable() {
                 <>
                     <h4 className="mb-3">Attendance Records for {employeeInfo.name}</h4>
                     <p><strong>Category:</strong> {employeeInfo.category}</p>
-                    <p><strong>Designation:</strong> {employeeInfo.designation}</p>
+                    <p><strong>Department:</strong> {employeeInfo.department}</p>
                     <p><strong>Total Late Mins </strong>{total_late_mins}</p>
                     <p><strong>Marked Days:</strong> {marked_days}</p>
                     <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>

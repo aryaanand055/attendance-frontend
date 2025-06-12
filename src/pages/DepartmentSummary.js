@@ -47,7 +47,7 @@ function DepartmentSummary() {
         let startY = 50;
         Object.entries(summaryData).forEach(([deptName, employees], idx) => {
             doc.text(`${deptName} Department`, 14, startY);
-            const tableColumn = ['Employee Name', 'Employee ID', 'Cumulative Summary', 'Leaves Detected'];
+            const tableColumn = ['Employee Name', 'Employee ID', 'Late Minutes', 'Leaves Detected'];
             const tableRows = employees.map(emp => [emp.name, emp.staff_id, emp.summary, emp.leaves]);
             autoTable(doc, {
                 head: [tableColumn],
@@ -69,7 +69,7 @@ function DepartmentSummary() {
                     <tr>
                         <th>Employee Name</th>
                         <th>Employee ID</th>
-                        <th>Cumulative Summary</th>
+                        <th>Late Minutes</th>
                         <th>Leaves Detected</th>
                     </tr>
                 </thead>

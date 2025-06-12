@@ -24,7 +24,8 @@ function LoginPage() {
       if (result.success) {
         showAlert('Login successful!', 'success');
         if (result.designation === 'HR') {
-          navigate(from || '/view', { replace: true });
+          // navigate(from || '/view', { replace: true });
+          navigate('/view', { replace: true });
         } else if (result.designation === 'STAFF') {
           navigate('/staffIndividualReport', { replace: true });
         } else {

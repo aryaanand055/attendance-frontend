@@ -8,7 +8,7 @@ function IndividualAttendanceTable() {
     const { user } = useAuth();
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
     const [submitted, setSubmitted] = useState(false);
-    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', designation: '', total_late_mins: '', marked_days: '' });
+    const [staffInfo, setstaffInfo] = useState({ name: '', category: '', department: '', total_late_mins: '', marked_days: '' });
     const [records, setRecords] = useState([]);
     const [columnsToShow, setColumnsToShow] = useState([]);
     const [error, setError] = useState('');
@@ -35,10 +35,10 @@ function IndividualAttendanceTable() {
 
             const employee = data[0] || {};
 
-            setEmployeeInfo({
+            setstaffInfo({
                 name: employee.name,
                 category: employee.category,
-                designation: employee.dept,
+                department: employee.dept,
             });
             const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
             const visibleCols = allColumns.filter(col => timing.some(row => row[col]));
@@ -57,9 +57,8 @@ function IndividualAttendanceTable() {
         doc.setFontSize(16);
         doc.text('Individual Attendance Report', 14, 16);
         doc.setFontSize(12);
-        doc.text(`Name: ${employeeInfo.name || ''}`, 14, 26);
-        doc.text(`Category: ${employeeInfo.category || ''}`, 14, 34);
-        doc.text(`Designation: ${employeeInfo.designation || ''}`, 14, 42);
+        doc.text(`Name: ${staffInfo.name || ''}`, 14, 26);
+        doc.text(`Department: ${staffInfo.department || ''}`, 14, 42);
         doc.text(`Total Late Mins: ${total_late_mins}`, 14, 50);
         doc.text(`Marked Days: ${marked_days}`, 14, 58);
 
@@ -78,7 +77,7 @@ function IndividualAttendanceTable() {
             styles: { fontSize: 10 },
             headStyles: { fillColor: [49, 58, 98] },
         });
-        doc.save(`attendance_${employeeInfo.name || 'employee'}.pdf`);
+        doc.save(`attendance_${staffInfo.name || 'employee'}.pdf`);
     };
 
     React.useEffect(() => {
@@ -89,7 +88,6 @@ function IndividualAttendanceTable() {
         const lastDay = new Date(yyyy, today.getMonth() + 1, 0).getDate();
         const endDate = `${yyyy}-${mm}-${String(lastDay).padStart(2, '0')}`;
         const empId = user.staffId || '';
-        console.log("User:", user);
         setFormData(prev => ({
             ...prev,
             startDate,
@@ -98,10 +96,17 @@ function IndividualAttendanceTable() {
         }));
     }, [user]);
 
+    React.useEffect(() => {
+        if (formData.startDate && formData.endDate && formData.employeeId) {
+            handleSubmit({ preventDefault: () => {} });
+        }
+    // eslint-disable-next-line 
+    }, [formData.startDate, formData.endDate, formData.employeeId]);
+
     return (
         <div className="container mt-4">
-            <h3 className="mb-3">Individual Attendance for Staff</h3>
-            <form onSubmit={handleSubmit} className="mb-4">
+            <h3 className="mb-3">Attendance Report for {staffInfo.name}</h3>
+            <form className="mb-4">
                 <div className="row mb-3">
                     <div className="col">
                         <label className="form-label">Start Date</label>
@@ -111,26 +116,24 @@ function IndividualAttendanceTable() {
                         <label className="form-label">End Date</label>
                         <input type="date" className="form-control" name="endDate" value={formData.endDate} onChange={handleChange} required />
                     </div>
-                    <div className="col">
-                        <label className="form-label">Employee ID</label>
-                        <input type="text" className="form-control" name="employeeId" value={formData.employeeId} readOnly required />
-                    </div>
                 </div>
-                <button type="submit" className="btn btn-primary">Get Records</button>
             </form>
 
             {error && <div className="alert alert-danger">{error}</div>}
 
             {submitted && (
                 <>
-                    <h4 className="mb-3">Attendance Records for {employeeInfo.name}</h4>
-                    <p><strong>Category:</strong> {employeeInfo.category}</p>
-                    <p><strong>Designation:</strong> {employeeInfo.designation}</p>
-                    <p><strong>Total Late Mins </strong>{total_late_mins}</p>
-                    <p><strong>Marked Days:</strong> {marked_days}</p>
-                    <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
+                    <p><strong>Department:</strong> {staffInfo.department}</p>
+                    <h5 className="mt-4 mb-3">Details since previous Reset: </h5>
+                    <p>
+                        <strong>Total Late Mins:</strong> {total_late_mins}
+                        <span style={{ display: 'inline-block', width: '2em' }}></span>
+                        <strong>Marked Days:</strong> {marked_days}
+                    </p>
+                    <button className="btn btn-outline-secondary mb-3 mt-3" onClick={handleSaveAsPDF}>
                         Save as PDF
                     </button>
+                    <h4 className="mt-4 mb-3">Attendance Details for the filtered date:</h4>
                     <table className="table table-bordered table-striped mt-3">
                         <thead className="table-dark">
                             <tr>
