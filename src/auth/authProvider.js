@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
           setIsAuthenticated(true);
           setDesignation(res.data.designation || '');
           setUser({ staffId: res.data.staff_id, designation: res.data.designation });
+          
         } else {
           setIsAuthenticated(false);
           setDesignation('');

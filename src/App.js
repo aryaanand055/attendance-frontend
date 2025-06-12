@@ -29,7 +29,20 @@ AlertProvider
 
 from './components/AlertProvider';
 
-function RequireAuth({ children }) {
+function RequireHR({ children }) {
+  const { isAuthenticated, designation } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  if (designation !== "HR") {
+    return <Navigate to="/staffIndividualReport" replace />;
+  }
+  return children;
+}
+
+function RequireStaff({ children }) {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
@@ -49,7 +62,7 @@ function AppContent() {
 
 return (
   <Router>
-    <div className="glassy-navbar-wrapper d-flex justify-content-center mt-3">
+    <div className="glassy-navbar-wrapper d-flex justify-content-center">
       <nav className="navbar navbar-expand-lg glassy-navbar">
         <div className="container-fluid">
           <a className="navbar-brand d-flex align-items-center fw-bold mx-3" href="/" title="Dashboard">
@@ -73,7 +86,7 @@ return (
                 </li>
               </ul>
             }
-            {isAuthenticated && designation ==="STAFF" &&
+            {isAuthenticated && designation !=="HR" &&
               <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
                 <li className="nav-item">
                   <Link className="nav-link" to="/staffIndividualReport">Attendance Report</Link>
@@ -100,33 +113,35 @@ return (
     </div>
     <div className="container m-large">
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/view" element={
-          <RequireAuth>
-            <AttendanceViewer />
-          </RequireAuth>
-        } />
-        <Route path="/summary" element={
-          <RequireAuth>
-            <DepartmentSummary />
-          </RequireAuth>
-        } />
-        <Route path="/individual" element={
-          <RequireAuth>
-            <IndividualAttendanceTable />
-          </RequireAuth>
-        } />
-        <Route path="/staffIndividualReport" element={
-          <RequireAuth>
-            <IndividualStaffReport />
-          </RequireAuth>
-        } />
-        <Route path="/" element={
-          <RequireAuth>
-            <Navigate to="/view" replace />
-          </RequireAuth>
-        } />
-      </Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/view" element={
+            <RequireHR>
+              <AttendanceViewer />
+            </RequireHR>
+          } />
+          <Route path="/summary" element={
+            <RequireHR>
+              <DepartmentSummary />
+            </RequireHR>
+          } />
+          <Route path="/individual" element={
+            <RequireHR>
+              <IndividualAttendanceTable />
+            </RequireHR>
+          } />
+          <Route path="/staffIndividualReport" element={
+            <RequireStaff>
+              <IndividualStaffReport />
+            </RequireStaff>
+          } />
+          <Route path="/" element={
+            isAuthenticated
+              ? (designation === "HR"
+                  ? <Navigate to="/view" replace />
+                  : <Navigate to="/staffIndividualReport" replace />)
+              : <Navigate to="/login" replace />
+          } />
+        </Routes>
     </div>
   </Router>
 );

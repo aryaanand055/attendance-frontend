@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+// import { useNavigate, useLocation } from 'react-router-dom';
+
+import { useNavigate} from 'react-router-dom';
+
 import { useAuth } from '../auth/authProvider'; 
 import { useAlert } from '../components/AlertProvider';
 
 function LoginPage() {
   const [formData, setFormData] = useState({ userId: '', password: '' });
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const { login } = useAuth();
   const { showAlert } = useAlert();
 
-  const from = location.state?.from?.pathname || '/view';
+  // const from = location.state?.from?.pathname || '/view';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
