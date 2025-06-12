@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../auth/authProvider'; // Import the useAuth hook
+import { useAuth } from '../auth/authProvider'; 
 import { useAlert } from '../components/AlertProvider';
 
 function LoginPage() {

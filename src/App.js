@@ -13,6 +13,7 @@ from 'react-router-dom';
 import AttendanceViewer from './pages/AttendanceViewer';
 import DepartmentSummary from './pages/DepartmentSummary';
 import IndividualAttendanceTable from './pages/IndividualAttendanceTable';
+import IndividualStaffReport from './pages/IndividualStaffReport';
 import LoginPage from './pages/LoginPage';
 
 import {
@@ -28,34 +29,27 @@ AlertProvider
 
 from './components/AlertProvider';
 
-function RequireAuth({
-children
-}
+function RequireAuth({ children }) {
+    const {isAuthenticated}= useAuth();
+    const location = useLocation();
 
-) {
-const {
-isAuthenticated
-}
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={ { from: location } } replace />;
+  }
 
-= useAuth();
-const location = useLocation();
-
-if (!isAuthenticated) {
-
-return <Navigate to="/login" state={ { from: location } } replace />;
-}
-
-return children;
+  return children;
 }
 
 function AppContent() {
 const {
 isAuthenticated,
-logout
+logout,
+designation
 }
 
 = useAuth();
-
+console.log("User Designation:", designation);
+  
 return (
   <Router>
     <div className="glassy-navbar-wrapper d-flex justify-content-center mt-3">
@@ -66,7 +60,7 @@ return (
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
-            {isAuthenticated &&
+            {isAuthenticated && designation ==="HR" &&
               <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
                 <li className="nav-item">
                   <Link className="nav-link" to="/view">Live Records</Link>
@@ -79,6 +73,14 @@ return (
                 </li>
               </ul>
             }
+            {isAuthenticated && designation ==="Staff" &&
+              <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/staffIndividualReport">Attendance Report</Link>
+                </li>
+              </ul>
+            }
+
 
             {isAuthenticated ? (
               <button className="nav-link d-flex align-items-center btn btn-link" onClick={logout} title="Logout">
@@ -112,6 +114,11 @@ return (
         <Route path="/individual" element={
           <RequireAuth>
             <IndividualAttendanceTable />
+          </RequireAuth>
+        } />
+        <Route path="/staffIndividualReport" element={
+          <RequireAuth>
+            <IndividualStaffReport />
           </RequireAuth>
         } />
         <Route path="/" element={

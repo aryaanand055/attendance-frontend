@@ -7,7 +7,7 @@ function DepartmentSummary() {
     const [selectedDept, setSelectedDept] = useState('');
     const [summaryData, setSummaryData] = useState({});
     const [date, setDate] = useState({});
-    const departments = ["ALL", "CSE", "Mechanical", "ECE"];
+    const departments = ["ALL", "CSE", "MECH", "ECE"];
 
     React.useEffect(() => {
         const defaultDept = "ALL";

@@ -9,6 +9,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [designation, setDesignation] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,11 +18,14 @@ export function AuthProvider({ children }) {
         const res = await axios.get('/check_session');
         if (res.data.message === 'Valid token') {
           setIsAuthenticated(true);
+          setDesignation(res.data.designation || '');
         } else {
           setIsAuthenticated(false);
+          setDesignation('');
         }
       } catch (err) {
         setIsAuthenticated(false);
+        setDesignation('');
       } finally {
         setLoading(false);
       }
@@ -35,6 +39,7 @@ export function AuthProvider({ children }) {
       const res = await axios.post('/login', credentials);
       if (res.data.message === 'Logged in successfully') {
         setIsAuthenticated(true);
+        setDesignation(res.data.designation || '');
         return { success: true };
       }
       return { success: false, reason: 'unknown' };
@@ -60,6 +65,7 @@ export function AuthProvider({ children }) {
     isAuthenticated,
     login,
     logout,
+    designation,
   };
 
   return loading ? (
