@@ -20,9 +20,16 @@ function LoginPage() {
     e.preventDefault();
     try {
       const result = await login(formData);
+      console.log('Login result:', result);
       if (result.success) {
         showAlert('Login successful!', 'success');
-        navigate(from, { replace: true });
+        if (result.designation === 'HR') {
+          navigate(from || '/view', { replace: true });
+        } else if (result.designation === 'STAFF') {
+          navigate('/staffIndividualReport', { replace: true });
+        } else {
+          showAlert('Unknown designation. Redirecting to dashboard.', 'warning');
+        }
       } else if (result.reason === 'invalid_credentials') {
         showAlert('Invalid User ID or Password', 'error');
       } else {

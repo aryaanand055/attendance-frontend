@@ -9,28 +9,32 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [designation, setDesignation] = useState('');
+  const [designation, setDesignation] = useState("");
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function checkSession() {
       try {
         const res = await axios.get('/check_session');
+        console.log('Session check response:', res.data);
         if (res.data.message === 'Valid token') {
           setIsAuthenticated(true);
           setDesignation(res.data.designation || '');
+          setUser({ staffId: res.data.staff_id, designation: res.data.designation });
         } else {
           setIsAuthenticated(false);
           setDesignation('');
+          setUser(null);
         }
       } catch (err) {
         setIsAuthenticated(false);
         setDesignation('');
+        setUser(null);
       } finally {
         setLoading(false);
       }
     }
-
     checkSession();
   }, []);
 
@@ -39,8 +43,9 @@ export function AuthProvider({ children }) {
       const res = await axios.post('/login', credentials);
       if (res.data.message === 'Logged in successfully') {
         setIsAuthenticated(true);
-        setDesignation(res.data.designation || '');
-        return { success: true };
+        setDesignation(res.data.designation || "");
+        setUser({ staffId: res.data.staff_id, designation: res.data.designation });
+        return { success: true, designation: res.data.designation || "" };
       }
       return { success: false, reason: 'unknown' };
     } catch (err) {
@@ -66,6 +71,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     designation,
+    user,
   };
 
   return loading ? (

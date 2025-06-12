@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import axios from '../axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useAuth } from '../auth/authProvider';
 
 function IndividualAttendanceTable() {
+    const { user } = useAuth();
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
     const [submitted, setSubmitted] = useState(false);
     const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', designation: '', total_late_mins: '', marked_days: '' });
@@ -86,16 +88,19 @@ function IndividualAttendanceTable() {
         const startDate = `${yyyy}-${mm}-01`;
         const lastDay = new Date(yyyy, today.getMonth() + 1, 0).getDate();
         const endDate = `${yyyy}-${mm}-${String(lastDay).padStart(2, '0')}`;
+        const empId = user.staffId || '';
+        console.log("User:", user);
         setFormData(prev => ({
             ...prev,
             startDate,
-            endDate
+            endDate,
+            employeeId: empId
         }));
-    }, []);
+    }, [user]);
 
     return (
         <div className="container mt-4">
-            <h3 className="mb-3">Individual Attendance</h3>
+            <h3 className="mb-3">Individual Attendance for Staff</h3>
             <form onSubmit={handleSubmit} className="mb-4">
                 <div className="row mb-3">
                     <div className="col">
@@ -108,11 +113,10 @@ function IndividualAttendanceTable() {
                     </div>
                     <div className="col">
                         <label className="form-label">Employee ID</label>
-                        <input type="text" className="form-control" name="employeeId" value={formData.employeeId} onChange={handleChange} required />
+                        <input type="text" className="form-control" name="employeeId" value={formData.employeeId} readOnly required />
                     </div>
                 </div>
                 <button type="submit" className="btn btn-primary">Get Records</button>
-
             </form>
 
             {error && <div className="alert alert-danger">{error}</div>}

@@ -30,8 +30,8 @@ AlertProvider
 from './components/AlertProvider';
 
 function RequireAuth({ children }) {
-    const {isAuthenticated}= useAuth();
-    const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={ { from: location } } replace />;
@@ -41,15 +41,12 @@ function RequireAuth({ children }) {
 }
 
 function AppContent() {
-const {
-isAuthenticated,
-logout,
-designation
-}
+  const {
+    isAuthenticated,
+    logout,
+    designation
+  } = useAuth();
 
-= useAuth();
-console.log("User Designation:", designation);
-  
 return (
   <Router>
     <div className="glassy-navbar-wrapper d-flex justify-content-center mt-3">
@@ -73,7 +70,7 @@ return (
                 </li>
               </ul>
             }
-            {isAuthenticated && designation ==="Staff" &&
+            {isAuthenticated && designation ==="STAFF" &&
               <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
                 <li className="nav-item">
                   <Link className="nav-link" to="/staffIndividualReport">Attendance Report</Link>
