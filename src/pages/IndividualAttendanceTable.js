@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -6,12 +6,12 @@ import autoTable from 'jspdf-autotable';
 function IndividualAttendanceTable() {
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
     const [submitted, setSubmitted] = useState(false);
-    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', department: '', total_late_mins: '', marked_days: '' });
+    const [employeeInfo, setEmployeeInfo] = useState({ name: '', category: '', department: '' });
     const [records, setRecords] = useState([]);
     const [columnsToShow, setColumnsToShow] = useState([]);
     const [error, setError] = useState('');
-    const [total_late_mins, setTotalLateMins] = useState(0);
-    const [marked_days, setMarkedDays] = useState(0);
+    const [totalLateMins, setTotalLateMins] = useState(0);
+    const [markedDays, setMarkedDays] = useState(0);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,22 +31,25 @@ function IndividualAttendanceTable() {
 
             const { absent_marked, total_late_mins, data, timing } = res.data;
 
-            const employee = data[0] || {};
+            const employee = (data && data[0]) || {};
 
             setEmployeeInfo({
-                name: employee.name,
-                category: employee.category,
-                department: employee.dept,
+                name: employee.name || '',
+                category: employee.category || '',
+                department: employee.dept || employee.department || '',
             });
+
             const allColumns = ['IN1', 'OUT1', 'IN2', 'OUT2', 'IN3', 'OUT3'];
-            const visibleCols = allColumns.filter(col => timing.some(row => row[col]));
-            setMarkedDays(absent_marked);
-            setTotalLateMins(total_late_mins);
+            const visibleCols = allColumns.filter(col => (timing || []).some(row => row[col]));
+            setMarkedDays(absent_marked || 0);
+            setTotalLateMins(total_late_mins || 0);
             setColumnsToShow(visibleCols);
-            setRecords(timing);
+            setRecords(timing || []);
             setSubmitted(true);
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to fetch data.');
+            setSubmitted(false);
+            setRecords([]);
         }
     };
 
@@ -58,8 +61,8 @@ function IndividualAttendanceTable() {
         doc.text(`Name: ${employeeInfo.name || ''}`, 14, 26);
         doc.text(`Category: ${employeeInfo.category || ''}`, 14, 34);
         doc.text(`Department: ${employeeInfo.department || ''}`, 14, 42);
-        doc.text(`Total Late Mins: ${total_late_mins}`, 14, 50);
-        doc.text(`Marked Days: ${marked_days}`, 14, 58);
+        doc.text(`Total Late Mins: ${totalLateMins}`, 14, 50);
+        doc.text(`Marked Days: ${markedDays}`, 14, 58);
 
         const tableColumn = ['S.No', 'Date', ...columnsToShow, 'Late Mins', 'Working Hours'];
         const tableRows = records.map((rec, idx) => [
@@ -79,7 +82,7 @@ function IndividualAttendanceTable() {
         doc.save(`attendance_${employeeInfo.name || 'employee'}.pdf`);
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -112,7 +115,6 @@ function IndividualAttendanceTable() {
                     </div>
                 </div>
                 <button type="submit" className="btn btn-primary">Get Records</button>
-
             </form>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -122,8 +124,8 @@ function IndividualAttendanceTable() {
                     <h4 className="mb-3">Attendance Records for {employeeInfo.name}</h4>
                     <p><strong>Category:</strong> {employeeInfo.category}</p>
                     <p><strong>Department:</strong> {employeeInfo.department}</p>
-                    <p><strong>Total Late Mins </strong>{total_late_mins}</p>
-                    <p><strong>Marked Days:</strong> {marked_days}</p>
+                    <p><strong>Total Late Mins: </strong>{totalLateMins}</p>
+                    <p><strong>Marked Days:</strong> {markedDays}</p>
                     <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
                         Save as PDF
                     </button>
@@ -140,18 +142,23 @@ function IndividualAttendanceTable() {
                             </tr>
                         </thead>
                         <tbody>
-                            {records.map((rec, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{rec.date}</td>
-
-                                    {columnsToShow.map((col, i) => (
-                                        <td key={i}>{rec[col] || '-'}</td>
-                                    ))}
-                                    <td>{rec.late_mins}</td>
-                                    <td>{rec.working_hours}</td>
+                            {records.length === 0 ? (
+                                <tr>
+                                    <td colSpan={2 + columnsToShow.length + 2} className="text-center">No records found.</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                records.map((rec, index) => (
+                                    <tr key={index}>
+                                        <td>{index + 1}</td>
+                                        <td>{rec.date}</td>
+                                        {columnsToShow.map((col, i) => (
+                                            <td key={i}>{rec[col] || '-'}</td>
+                                        ))}
+                                        <td>{rec.late_mins}</td>
+                                        <td>{rec.working_hours}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </>

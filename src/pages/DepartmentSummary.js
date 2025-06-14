@@ -6,28 +6,23 @@ import autoTable from 'jspdf-autotable';
 function DepartmentSummary() {
     const [selectedDept, setSelectedDept] = useState('');
     const [summaryData, setSummaryData] = useState({});
-    const [date, setDate] = useState({});
-    const departments = ["ALL", "CSE", "MECH", "ECE"];
+    const [date, setDate] = useState([]);
+    
+    const departments = ["ALL", "Teaching Staff", "Non Teaching Staff", "CSE", "MECH", "ECE"];
 
-    React.useEffect(() => {
-        const defaultDept = "ALL";
-        setSelectedDept(defaultDept);
+    useEffect(() => {
+        setSelectedDept("ALL");
     }, []);
 
     const fetchDeptSummary = useCallback(async () => {
         if (!selectedDept) return;
-
         try {
-            console.log('Requesting summary for:', selectedDept);
             const response = await axios.post('/dept_summary', {
                 dept: selectedDept
             });
-
             setSummaryData(response.data.data || {});
-            setDate(response.data.date || {});
-
+            setDate(response.data.date || []);
         } catch (error) {
-            console.error('Error fetching department summary:', error);
             setSummaryData({});
         }
     }, [selectedDept]);
@@ -42,28 +37,57 @@ function DepartmentSummary() {
         doc.text('Department-wise Summary', 14, 16);
         doc.setFontSize(12);
         doc.text(`Department: ${selectedDept}`, 14, 26);
-        doc.text(`From: ${date[0]?.slice(0, 10) || 'No date'}`, 14, 34);
-        doc.text(`To: ${date[1]?.slice(0, 10) || 'No date'}`, 14, 42);
+        doc.text(`From: ${date[0] || 'No date'}`, 14, 34);
+        doc.text(`To: ${date[1] || 'No date'}`, 14, 42);
         let startY = 50;
-        Object.entries(summaryData).forEach(([deptName, employees], idx) => {
-            doc.text(`${deptName} Department`, 14, startY);
-            const tableColumn = ['Employee Name', 'Employee ID', 'Late Minutes', 'Leaves Detected'];
-            const tableRows = employees.map(emp => [emp.name, emp.staff_id, emp.summary, emp.leaves]);
-            autoTable(doc, {
-                head: [tableColumn],
-                body: tableRows,
-                startY: startY + 4,
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [49, 58, 98] },
+
+        if (selectedDept === "ALL") {
+            Object.entries(summaryData).forEach(([category, depts]) => {
+                doc.setFontSize(14);
+                doc.text(`${category}`, 14, startY);
+                startY += 6;
+                Object.entries(depts).forEach(([deptName, employees]) => {
+                    doc.setFontSize(12);
+                    doc.text(`${deptName} Department`, 18, startY);
+                    const tableColumn = ['Employee Name', 'Employee ID', 'Late Minutes', 'Leaves Detected'];
+                    const tableRows = Array.isArray(employees)
+                        ? employees.map(emp => [emp.name, emp.staff_id, emp.summary, emp.leaves])
+                        : [];
+                    autoTable(doc, {
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: startY + 4,
+                        styles: { fontSize: 10 },
+                        headStyles: { fillColor: [49, 58, 98] },
+                        margin: { left: 18 }
+                    });
+                    startY = doc.lastAutoTable.finalY + 10;
+                });
+                startY += 6;
             });
-            startY = doc.lastAutoTable.finalY + 10;
-        });
+        } else {
+            Object.entries(summaryData).forEach(([deptName, employees]) => {
+                doc.text(`${deptName} Department`, 14, startY);
+                const tableColumn = ['Employee Name', 'Employee ID', 'Late Minutes', 'Leaves Detected'];
+                const tableRows = Array.isArray(employees)
+                    ? employees.map(emp => [emp.name, emp.staff_id, emp.summary, emp.leaves])
+                    : [];
+                autoTable(doc, {
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: startY + 4,
+                    styles: { fontSize: 10 },
+                    headStyles: { fillColor: [49, 58, 98] },
+                });
+                startY = doc.lastAutoTable.finalY + 10;
+            });
+        }
         doc.save(`dept_summary_${selectedDept}.pdf`);
     };
 
     const renderTable = (deptName, employees) => (
-        <div key={deptName} className="mt-4">
-            <h3>{deptName} Department</h3>
+        <div key={deptName} className="mt-4 ms-4">
+            <h5>{deptName} Department</h5>
             <table className="table table-bordered table-striped mt-2">
                 <thead className="thead-dark">
                     <tr>
@@ -74,16 +98,31 @@ function DepartmentSummary() {
                     </tr>
                 </thead>
                 <tbody>
-                    {employees.map((emp, index) => (
-                        <tr key={`${emp.staff_id}-${index}`}>
-                            <td>{emp.name}</td>
-                            <td>{emp.staff_id}</td>
-                            <td>{emp.summary}</td>
-                            <td>{emp.leaves}</td>
+                    {Array.isArray(employees) && employees.length > 0 ? (
+                        employees.map((emp, index) => (
+                            <tr key={`${emp.staff_id}-${index}`}>
+                                <td>{emp.name}</td>
+                                <td>{emp.staff_id}</td>
+                                <td>{emp.summary}</td>
+                                <td>{emp.leaves}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={4} className="text-center">No employees found.</td>
                         </tr>
-                    ))}
+                    )}
                 </tbody>
             </table>
+        </div>
+    );
+
+    const renderCategory = (categoryName, departments) => (
+        <div key={categoryName} className="mt-4">
+            <h3>{categoryName}</h3>
+            {Object.entries(departments).map(([deptName, employees]) =>
+                renderTable(deptName, employees)
+            )}
         </div>
     );
 
@@ -96,7 +135,9 @@ function DepartmentSummary() {
 
             <div className="row mb-3">
                 <div className="col-md-4 mb-2">
+                    <div className="mb-2">
                     <label htmlFor="departmentSelect">Department:</label>
+                    </div>
                     <select
                         id="departmentSelect"
                         className="form-control"
@@ -111,12 +152,9 @@ function DepartmentSummary() {
                         ))}
                     </select>
                 </div>
-
             </div>
 
-
             {selectedDept && Object.keys(summaryData).length > 0 ? (
-
                 <>
                     <div className="col-md-4 mb-2">
                         <div className="date-range-container d-flex align-items-center gap-2">
@@ -125,7 +163,7 @@ function DepartmentSummary() {
                                 type="text"
                                 id="dateDisplay1"
                                 className="form-control date-input"
-                                value={date[0]?.slice(0, 10) || 'No date'}
+                                value={date[0] || 'No date'}
                                 readOnly
                             />
                             <label className="date-label">To:</label>
@@ -133,17 +171,20 @@ function DepartmentSummary() {
                                 type="text"
                                 id="dateDisplay2"
                                 className="form-control date-input"
-                                value={date[1]?.slice(0, 10) || 'No date'}
+                                value={date[1] || 'No date'}
                                 readOnly
                             />
                         </div>
                     </div>
 
-
-                    {Object.entries(summaryData).map(([deptName, employees]) =>
-                        renderTable(deptName, employees)
-                    )}
-
+                    {selectedDept === "ALL"
+                        ? Object.entries(summaryData).map(([categoryName, departments]) =>
+                            renderCategory(categoryName, departments)
+                        )
+                        : Object.entries(summaryData).map(([deptName, employees]) =>
+                            renderTable(deptName, employees)
+                        )
+                    }
                 </>
             ) : selectedDept && Object.keys(summaryData).length === 0 ? (
                 <div className="alert alert-info mt-3">
