@@ -9,29 +9,13 @@ function DepartmentSummary() {
     const [summaryData, setSummaryData] = useState({});
     const [date, setDate] = useState([]);
 
-    const departments = ["ALL", "Teaching Staff", "Non Teaching Staff"];
+    const departments = ["CSE", "ECE", "MECH", "EEE", "CIVIL"];
 
     useEffect(() => {
         setSelectedDept("ALL");
     }, []);
 
-    const deptOptions = {
-        teaching: [
-            "CSE",
-            "ECE",
-            "MECH",
 
-        ],
-        nonTeaching: [
-            "ECE"
-        ]
-    };
-
-    const getSubDepartments = () => {
-        if (mainCategory === 'Teaching Staff') return deptOptions.teaching;
-        if (mainCategory === 'Non Teaching Staff') return deptOptions.nonTeaching;
-        return [];
-    };
 
     const fetchDeptSummary = useCallback(async () => {
         if (!mainCategory || (mainCategory !== "ALL" && selectedDept === "")) return;
@@ -59,7 +43,7 @@ function DepartmentSummary() {
 
     const handleSaveAsPDF = () => {
         const doc = new jsPDF();
-        doc.setFontSize(16);
+        doc.setFontSize(24);
         doc.text('Department-wise Summary', 14, 16);
         doc.setFontSize(12);
         doc.text(`Department: ${mainCategory === 'ALL' ? 'ALL' : (selectedDept === 'ALL' ? mainCategory : selectedDept)}`, 14, 26);
@@ -85,14 +69,17 @@ function DepartmentSummary() {
 
         if (mainCategory === "ALL") {
             Object.entries(summaryData).forEach(([category, depts]) => {
+                doc.line(14, startY, 196, startY);
+                startY += 15;
                 doc.setFontSize(14);
+                category = category.toUpperCase();
                 doc.text(`${category}`, 14, startY);
-                startY += 6;
+                startY += 10;
                 Object.entries(depts).forEach(([deptName, employees]) => {
                     doc.setFontSize(12);
                     generateTable(deptName, employees);
                 });
-                startY += 6;
+                startY += 4;
             });
         } else {
             Object.entries(summaryData).forEach(([deptName, employees]) => {
@@ -140,7 +127,7 @@ function DepartmentSummary() {
 
     const renderCategory = (categoryName, departments) => (
         <div key={categoryName} className="mt-4">
-            <h3>{categoryName}</h3>
+            <h3 className='text-capitalize'>{categoryName}</h3>
             {Object.entries(departments).map(([deptName, employees]) =>
                 renderTable(deptName, employees)
             )}
@@ -164,7 +151,6 @@ function DepartmentSummary() {
                         value={mainCategory}
                         onChange={(e) => {
                             setMainCategory(e.target.value);
-                            setSelectedDept('');
                         }}
                     >
                         <option value="">Choose Category</option>
@@ -174,31 +160,22 @@ function DepartmentSummary() {
                     </select>
                 </div>
 
-                {(mainCategory === 'Teaching Staff' || mainCategory === 'Non Teaching Staff') && (
-                    <div className="col-md-4 mb-2">
-                        <label className='mb-2'>Department:</label>
-                        <select
-                            className="form-control"
-                            value={selectedDept}
-                            onChange={(e) => setSelectedDept(e.target.value)}
-                        >
-                            <option value="">Choose a department</option>
-                            <option value="ALL">ALL</option>
-                            {getSubDepartments().map(dept => (
-                                <option key={dept} value={dept}>{dept}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
+                <div className="col-md-4 mb-2">
+                    <label className='mb-2'>Department:</label>
+                    <select
+                        className="form-control"
+                        value={selectedDept}
+                        onChange={(e) => setSelectedDept(e.target.value)}
+                    >
+                        <option value="">Choose a department</option>
+                        <option value="ALL">ALL</option>
+                        {departments.map(dept => (
+                            <option key={dept} value={dept}>{dept}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
-            <button
-                className="btn btn-outline-primary mt-2 mb-3"
-                onClick={handleSaveAsPDF}
-                disabled={mainCategory === "" || (mainCategory !== "ALL" && selectedDept === "")}
-            >
-                Save as PDF
-            </button>
 
             {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
                 <>
@@ -223,7 +200,10 @@ function DepartmentSummary() {
 
                     {mainCategory === "ALL"
                         ? Object.entries(summaryData).map(([categoryName, departments]) =>
-                            renderCategory(categoryName, departments)
+                            <>
+                                <hr className='hr w m-auto my-4 '></hr>
+                                {renderCategory(categoryName, departments)}
+                            </>
                         )
                         : Object.entries(summaryData).map(([deptName, employees]) =>
                             renderTable(deptName, employees)
