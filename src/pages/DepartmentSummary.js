@@ -246,7 +246,8 @@ function DepartmentSummary() {
                     <div className="alert alert-info mt-3">No data available for the selected department.</div>
                 )}
             </div>
-            );
+        </div>
+    );
 }
 
-            export default DepartmentSummary;
+export default DepartmentSummary;
