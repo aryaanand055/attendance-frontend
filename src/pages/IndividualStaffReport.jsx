@@ -106,6 +106,8 @@ function IndividualAttendanceTable() {
     return (
         <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
             <h3 className="mb-4 fw-bold text-c-primary text-center">Attendance Report for {staffInfo.name}</h3>
+            <hr className='hr w-75 m-auto my-4 '></hr>
+
             <form className="mb-4">
                 <div className="row mb-3">
                     <div className="col">
@@ -134,8 +136,8 @@ function IndividualAttendanceTable() {
                         Save as PDF
                     </button>
                     <h4 className="mt-4 mb-3">Attendance Details for the filtered date:</h4>
-                    <table className="table table-bordered table-striped mt-3">
-                        <thead className="table-dark">
+                    <table className="table table-c mt-3">
+                        <thead className="table-secondary">
                             <tr>
                                 <th>S.No</th>
                                 <th>Date</th>

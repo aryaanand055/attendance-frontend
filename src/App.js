@@ -14,6 +14,7 @@ import AttendanceViewer from './pages/AttendanceViewer';
 import DepartmentSummary from './pages/DepartmentSummary';
 import IndividualAttendanceTable from './pages/IndividualAttendanceTable';
 import IndividualStaffReport from './pages/IndividualStaffReport';
+import ExemptionApplyPage from './pages/applyExemption';
 import LoginPage from './pages/LoginPage';
 import HRExcemptions from './pages/HRExcemptions';
 
@@ -95,6 +96,9 @@ function AppContent() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/staffIndividualReport">Attendance Report</Link>
                   </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/applyExemption">Apply Exemption</Link>
+                  </li>
                 </ul>
               }
 
@@ -136,6 +140,11 @@ function AppContent() {
           <Route path="/staffIndividualReport" element={
             <RequireStaff>
               <IndividualStaffReport />
+            </RequireStaff>
+          } />
+          <Route path="/applyExemption" element={
+            <RequireStaff>
+              <ExemptionApplyPage />
             </RequireStaff>
           } />
           <Route path="/exemptions" element={

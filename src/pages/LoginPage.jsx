@@ -45,11 +45,11 @@ function LoginPage() {
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: '400px' }}>
-      <h3 className="mb-4">Employee Login</h3>
+    <div className="container mt-5 mb-5 p-5 rounded-4 shadow-lg bg-white bg-opacity-75" style={{ maxWidth: '400px' }}>
+      <h3 className="mb-4 text-c-primary">Login</h3>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label className="form-label">User ID</label>
+          <label className="form-label fw-medium">User ID</label>
           <input
             type="text"
             name="userId"
@@ -60,7 +60,7 @@ function LoginPage() {
           />
         </div>
         <div className="mb-4">
-          <label className="form-label">Password</label>
+          <label className="form-label fw-medium">Password</label>
           <input
             type="password"
             name="password"
@@ -70,7 +70,7 @@ function LoginPage() {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary w-100">Login</button>
+        <button type="submit" className="btn btn-primary w-100 btn-c-primary">Login</button>
       </form>
     </div>
   );

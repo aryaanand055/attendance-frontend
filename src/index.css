@@ -97,3 +97,10 @@
 .text-c-primary {
   color: var(--primary);
 }
+
+.table-c thead th,
+.table-c thead td {
+  background-color: var(--primary);
+  color: var(--color-6);
+  font-weight: bold;
+}
