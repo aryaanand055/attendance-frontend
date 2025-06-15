@@ -78,3 +78,22 @@
     cursor: pointer;
   }
 }
+
+.btn-c-primary {
+  background-color: var(--primary);
+  color: var(--color-6);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-c-primary:hover {
+  color: var(--color-6);
+  background-color: var(--secondary);
+  box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-c-primary {
+  color: var(--primary);
+}

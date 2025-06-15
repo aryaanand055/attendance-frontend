@@ -98,14 +98,14 @@ function IndividualAttendanceTable() {
 
     React.useEffect(() => {
         if (formData.startDate && formData.endDate && formData.employeeId) {
-            handleSubmit({ preventDefault: () => {} });
+            handleSubmit({ preventDefault: () => { } });
         }
-    // eslint-disable-next-line 
+        // eslint-disable-next-line 
     }, [formData.startDate, formData.endDate, formData.employeeId]);
 
     return (
-        <div className="container mt-4">
-            <h3 className="mb-3">Attendance Report for {staffInfo.name}</h3>
+        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
+            <h3 className="mb-4 fw-bold text-c-primary text-center">Attendance Report for {staffInfo.name}</h3>
             <form className="mb-4">
                 <div className="row mb-3">
                     <div className="col">

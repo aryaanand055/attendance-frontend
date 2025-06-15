@@ -7,7 +7,7 @@ function DepartmentSummary() {
     const [selectedDept, setSelectedDept] = useState('');
     const [summaryData, setSummaryData] = useState({});
     const [date, setDate] = useState([]);
-    
+
     const departments = ["ALL", "Teaching Staff", "Non Teaching Staff", "CSE", "MECH", "ECE"];
 
     useEffect(() => {
@@ -127,8 +127,8 @@ function DepartmentSummary() {
     );
 
     return (
-        <div className="container mt-4">
-            <h2 className="text-center mb-4">Department-wise Summary</h2>
+        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
+            <h2 className="mb-4 fw-bold text-c-primary text-center">Department-wise Summary</h2>
             <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
                 Save as PDF
             </button>
@@ -136,7 +136,7 @@ function DepartmentSummary() {
             <div className="row mb-3">
                 <div className="col-md-4 mb-2">
                     <div className="mb-2">
-                    <label htmlFor="departmentSelect">Department:</label>
+                        <label htmlFor="departmentSelect">Department:</label>
                     </div>
                     <select
                         id="departmentSelect"

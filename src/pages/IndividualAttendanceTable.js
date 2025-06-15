@@ -96,9 +96,17 @@ function IndividualAttendanceTable() {
         }));
     }, []);
 
+    // Auto-submit when any input changes and all fields are filled
+    React.useEffect(() => {
+        if (formData.startDate && formData.endDate && formData.employeeId) {
+            handleSubmit({ preventDefault: () => { } });
+        }
+        // eslint-disable-next-line
+    }, [formData.startDate, formData.endDate, formData.employeeId]);
+
     return (
-        <div className="container mt-4">
-            <h3 className="mb-3">Individual Attendance</h3>
+        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
+            <h3 className="mb-4 fw-bold text-c-primary text-center">Individual Attendance</h3>
             <form onSubmit={handleSubmit} className="mb-4">
                 <div className="row mb-3">
                     <div className="col">
@@ -114,7 +122,6 @@ function IndividualAttendanceTable() {
                         <input type="text" className="form-control" name="employeeId" value={formData.employeeId} onChange={handleChange} required />
                     </div>
                 </div>
-                <button type="submit" className="btn btn-primary">Get Records</button>
             </form>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -129,7 +136,7 @@ function IndividualAttendanceTable() {
                     <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
                         Save as PDF
                     </button>
-                    <table className="table table-bordered table-striped mt-3">
+                    <table className="table mt-3">
                         <thead className="table-dark">
                             <tr>
                                 <th>S.No</th>

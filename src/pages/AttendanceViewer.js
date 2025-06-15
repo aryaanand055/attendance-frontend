@@ -68,9 +68,9 @@ function AttendanceViewer() {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Live Attendance Logs</h2>
+        <h2 className="mb-4 fw-bold text-c-primary">Live Attendance Logs</h2>
         <div className="form-group mb-0">
           <label htmlFor="date" className="form-label me-2">Select Date:</label>
           <input
