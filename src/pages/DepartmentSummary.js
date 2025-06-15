@@ -9,7 +9,7 @@ function DepartmentSummary() {
     const [summaryData, setSummaryData] = useState({});
     const [date, setDate] = useState([]);
 
-    const departments = ["ALL", "Teaching Staff", "Non Teaching Staff", "CSE", "MECH", "ECE"];
+    const departments = ["ALL", "Teaching Staff", "Non Teaching Staff"];
 
     useEffect(() => {
         setSelectedDept("ALL");
@@ -17,19 +17,13 @@ function DepartmentSummary() {
 
     const deptOptions = {
         teaching: [
-            "Mathematics",
-            "Physics",
-            "Chemistry",
-            "Biology",
-            "English",
-            "Computer Science"
+           "CSE",
+            "ECE",
+            "MECH",
+           
         ],
         nonTeaching: [
-            "Administration",
-            "Library",
-            "Accounts",
-            "Maintenance",
-            "Transport"
+          "ECE"
         ]
     };
 
@@ -163,11 +157,9 @@ function DepartmentSummary() {
                 </button>
 
                 <div className="row mb-3">
-                    <div className="col-md-4 mb-2">
-                        <div className="mb-2">
-                            <label htmlFor="departmentSelect">Department:</label>
-                        </div>
-                        <label>Main Category:</label>
+                    <div className="col-md-4 mb-1">
+                        
+                        <label className='mb-2'>&nbsp;Category:</label>
                         <select
                             className="form-control"
                             value={mainCategory}
@@ -185,7 +177,7 @@ function DepartmentSummary() {
 
                     {(mainCategory === 'Teaching Staff' || mainCategory === 'Non Teaching Staff') && (
                         <div className="col-md-4 mb-2">
-                            <label>Department:</label>
+                            <label className='mb-2'>Department:</label>
                             <select
                                 className="form-control"
                                 value={selectedDept}
