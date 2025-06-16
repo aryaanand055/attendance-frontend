@@ -107,6 +107,8 @@ function IndividualAttendanceTable() {
     return (
         <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
             <h3 className="mb-4 fw-bold text-c-primary text-center">Individual Attendance</h3>
+            <hr className='hr w-75 m-auto my-4 '></hr>
+
             <form onSubmit={handleSubmit} className="mb-4">
                 <div className="row mb-3">
                     <div className="col">
@@ -136,8 +138,8 @@ function IndividualAttendanceTable() {
                     <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
                         Save as PDF
                     </button>
-                    <table className="table mt-3">
-                        <thead className="table-dark">
+                    <table className="table table-c mt-3">
+                        <thead className="table-secondary">
                             <tr>
                                 <th>S.No</th>
                                 <th>Date</th>

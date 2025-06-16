@@ -70,7 +70,8 @@ function AttendanceViewer() {
   return (
     <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-4 fw-bold text-c-primary">Live Attendance Logs</h2>
+        <h2 className="mb-4 fw-bold text-c-primary text-center">Live Attendance Logs</h2>
+
         <div className="form-group mb-0">
           <label htmlFor="date" className="form-label me-2">Select Date:</label>
           <input
@@ -82,6 +83,8 @@ function AttendanceViewer() {
           />
         </div>
       </div>
+      <hr className='hr w-75 m-auto my-4 '></hr>
+
       <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
         Save as PDF
       </button>
@@ -89,8 +92,8 @@ function AttendanceViewer() {
       {loading && <div className="text-center my-4">Loading...</div>}
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <table className="table table-bordered table-striped">
-        <thead className="table-dark">
+      <table className="table table-c">
+        <thead className="table-secondary">
           <tr>
             <th>Staff ID</th>
             <th>Name</th>

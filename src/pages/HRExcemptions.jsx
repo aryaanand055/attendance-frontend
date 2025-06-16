@@ -15,7 +15,6 @@ function HRExcemptions() {
     ];
     const [selectedSessions, setSelectedSessions] = useState([]);
 
-    // Get exemptions data
 
     const [exemptions, setExemptions] = useState([
         { staffId: 'I001', name: 'User 1', type: 'Day', date: todayDate, reason: 'medical', status: 'approved' },
@@ -127,6 +126,8 @@ function HRExcemptions() {
     return (
         <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
             <h2 className="mb-4 fw-bold text-c-primary text-center">Exemptions</h2>
+            <hr className='hr w-75 m-auto my-4 '></hr>
+
             <div className="mb-5 p-4 rounded-3 bg-light border">
                 <h4 className="mb-3 text-secondary">View Exemptions</h4>
                 <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
@@ -147,8 +148,8 @@ function HRExcemptions() {
                     </select>
                 </div>
                 <div className="table-responsive rounded-3 border">
-                    <table className='table align-middle mb-0'>
-                        <thead className="table-light">
+                    <table className='table table-c align-middle mb-0'>
+                        <thead className="table-secondary">
                             <tr>
                                 <th>Staff ID</th>
                                 <th>Staff Name</th>

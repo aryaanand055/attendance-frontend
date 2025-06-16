@@ -55,7 +55,7 @@ function DepartmentSummary() {
 
     const handleSaveAsPDF = () => {
         const doc = new jsPDF();
-        doc.setFontSize(16);
+        doc.setFontSize(24);
         doc.text('Department-wise Summary', 14, 16);
         doc.setFontSize(12);
         doc.text(
@@ -89,14 +89,17 @@ function DepartmentSummary() {
 
         if (mainCategory === "ALL") {
             Object.entries(summaryData).forEach(([category, depts]) => {
+                doc.line(14, startY, 196, startY);
+                startY += 15;
                 doc.setFontSize(14);
+                category = category.toUpperCase();
                 doc.text(`${category}`, 14, startY);
-                startY += 6;
+                startY += 10;
                 Object.entries(depts).forEach(([deptName, employees]) => {
                     doc.setFontSize(12);
                     generateTable(deptName, employees);
                 });
-                startY += 6;
+                startY += 4;
             });
         } else {
             Object.entries(summaryData).forEach(([deptName, employees]) => {
@@ -112,8 +115,8 @@ function DepartmentSummary() {
         return (
             <div key={deptName} className="mt-4 ms-4">
                 <h5>{deptName} Department</h5>
-                <table className="table table-bordered table-striped mt-2">
-                    <thead className="thead-dark">
+                <table className="table table-c mt-2">
+                    <thead className="thead-secondary">
                         <tr>
                             <th>Employee Name</th>
                             <th>Employee ID</th>
@@ -144,7 +147,7 @@ function DepartmentSummary() {
 
     const renderCategory = (categoryName, departments) => (
         <div key={categoryName} className="mt-4">
-            <h3>{categoryName}</h3>
+            <h3 className='text-capitalize'>{categoryName}</h3>
             {Object.entries(departments).map(([deptName, employees]) =>
                 renderTable(deptName, employees)
             )}
@@ -199,43 +202,45 @@ function DepartmentSummary() {
 
                 
 
-                {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
-                    <>
-                        <div className="col-md-4 mb-2">
-                            <div className="date-range-container d-flex align-items-center gap-2">
-                                <label className="me-2">From:</label>
-                                <input
-                                    type="text"
-                                    className="form-control me-3"
-                                    value={date[0] || 'No date'}
-                                    readOnly
-                                />
-                                <label className="me-2">To:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={date[1] || 'No date'}
-                                    readOnly
-                                />
-                            </div>
+            {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
+                <>
+                    <div className="col-md-4 mb-2">
+                        <div className="date-range-container d-flex align-items-center gap-2">
+                            <label className="me-2">From:</label>
+                            <input
+                                type="text"
+                                className="form-control me-3"
+                                value={date[0] || 'No date'}
+                                readOnly
+                            />
+                            <label className="me-2">To:</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={date[1] || 'No date'}
+                                readOnly
+                            />
                         </div>
+                    </div>
 
-                        {mainCategory === "ALL"
-                            ? Object.entries(summaryData).map(([categoryName, departments]) =>
-                                renderCategory(categoryName, departments)
-                            )
-                            : Object.entries(summaryData).map(([deptName, employees]) =>
-                                renderTable(deptName, employees)
-                            )}
-                    </>
-                ) : mainCategory === "" ? (
-                    <div className="alert alert-info mt-3">Please select a category to view the summary.</div>
-                ) : (mainCategory !== "ALL" && selectedDept === "") ? (
-                    <div className="alert alert-info mt-3">Please choose a department.</div>
-                ) : (
-                    <div className="alert alert-info mt-3">No data available for the selected department.</div>
-                )}
-            </div>
+                    {mainCategory === "ALL"
+                        ? Object.entries(summaryData).map(([categoryName, departments]) =>
+                            <>
+                                <hr className='hr w m-auto my-4 '></hr>
+                                {renderCategory(categoryName, departments)}
+                            </>
+                        )
+                        : Object.entries(summaryData).map(([deptName, employees]) =>
+                            renderTable(deptName, employees)
+                        )}
+                </>
+            ) : mainCategory === "" ? (
+                <div className="alert alert-info mt-3">Please select a category to view the summary.</div>
+            ) : (mainCategory !== "ALL" && selectedDept === "") ? (
+                <div className="alert alert-info mt-3">Please choose a department.</div>
+            ) : (
+                <div className="alert alert-info mt-3">No data available for the selected department.</div>
+            )}
         </div>
     );
 }
