@@ -9,9 +9,8 @@ function DepartmentSummary() {
     const [summaryData, setSummaryData] = useState({});
     const [date, setDate] = useState([]);
 
-    
-    const allDepartments = ["CSE", "ECE", "MECH", ];
-
+    const allDepartments = ["CSE", "ECE", "MECH"];
+    const nonTeachingDepartments = ["ADMIN", "LIBRARY", "ECE" , "CSE"];
     const departments = [
         "ALL",
         "Teaching Staff",
@@ -19,10 +18,9 @@ function DepartmentSummary() {
         "Department Wise"
     ];
 
-   
     const getSubDepartments = () => {
-        if (mainCategory === 'Teaching Staff') return [ "CSE", "ECE", "MECH"];
-        if (mainCategory === 'Non Teaching Staff') return ["ADMIN", "LIBRARY","ECE"];
+        if (mainCategory === 'Teaching Staff') return allDepartments;
+        if (mainCategory === 'Non Teaching Staff') return nonTeachingDepartments;
         if (mainCategory === 'Department Wise') return allDepartments;
         return [];
     };
@@ -30,15 +28,24 @@ function DepartmentSummary() {
     const fetchDeptSummary = useCallback(async () => {
         if (!mainCategory || (mainCategory !== "ALL" && mainCategory !== "Department Wise" && selectedDept === "")) return;
 
-        let deptToSend = mainCategory;
+        let categoryToSend = mainCategory;
+        let deptToSend = "";
+
         if (mainCategory === "Department Wise" && selectedDept) {
             deptToSend = selectedDept;
-        } else if (selectedDept && selectedDept !== "ALL") {
+            categoryToSend = ""; 
+        } else if (
+            (mainCategory === "Teaching Staff" || mainCategory === "Non Teaching Staff") &&
+            selectedDept && selectedDept !== "ALL"
+        ) {
             deptToSend = selectedDept;
+        } else if (mainCategory === "ALL") {
+            categoryToSend = "ALL";
         }
 
         try {
             const response = await axios.post('/dept_summary', {
+                category: categoryToSend,
                 dept: deptToSend
             });
             setSummaryData(response.data.data || {});
@@ -196,8 +203,6 @@ function DepartmentSummary() {
                         </div>
                     )}
                 </div>
-
-                
 
                 {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
                     <>
