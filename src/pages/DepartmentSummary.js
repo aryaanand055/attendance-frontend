@@ -9,35 +9,31 @@ function DepartmentSummary() {
     const [summaryData, setSummaryData] = useState({});
     const [date, setDate] = useState([]);
 
-    const departments = ["ALL", "Teaching Staff", "Non Teaching Staff"];
+    
+    const allDepartments = ["CSE", "ECE", "MECH", ];
 
-    useEffect(() => {
-        setSelectedDept("ALL");
-    }, []);
+    const departments = [
+        "ALL",
+        "Teaching Staff",
+        "Non Teaching Staff",
+        "Department Wise"
+    ];
 
-    const deptOptions = {
-        teaching: [
-           "CSE",
-            "ECE",
-            "MECH",
-           
-        ],
-        nonTeaching: [
-          "ECE"
-        ]
-    };
-
+   
     const getSubDepartments = () => {
-        if (mainCategory === 'Teaching Staff') return deptOptions.teaching;
-        if (mainCategory === 'Non Teaching Staff') return deptOptions.nonTeaching;
+        if (mainCategory === 'Teaching Staff') return [ "CSE", "ECE", "MECH"];
+        if (mainCategory === 'Non Teaching Staff') return ["ADMIN", "LIBRARY","ECE"];
+        if (mainCategory === 'Department Wise') return allDepartments;
         return [];
     };
 
     const fetchDeptSummary = useCallback(async () => {
-        if (!mainCategory || (mainCategory !== "ALL" && selectedDept === "")) return;
+        if (!mainCategory || (mainCategory !== "ALL" && mainCategory !== "Department Wise" && selectedDept === "")) return;
 
         let deptToSend = mainCategory;
-        if (selectedDept && selectedDept !== "ALL") {
+        if (mainCategory === "Department Wise" && selectedDept) {
+            deptToSend = selectedDept;
+        } else if (selectedDept && selectedDept !== "ALL") {
             deptToSend = selectedDept;
         }
 
@@ -62,7 +58,15 @@ function DepartmentSummary() {
         doc.setFontSize(16);
         doc.text('Department-wise Summary', 14, 16);
         doc.setFontSize(12);
-        doc.text(`Department: ${mainCategory === 'ALL' ? 'ALL' : (selectedDept === 'ALL' ? mainCategory : selectedDept)}`, 14, 26);
+        doc.text(
+            `Department: ${mainCategory === 'ALL'
+                ? 'ALL'
+                : (mainCategory === "Department Wise"
+                    ? selectedDept
+                    : (selectedDept === 'ALL' ? mainCategory : selectedDept)
+                )}`,
+            14, 26
+        );
         doc.text(`From: ${date[0] || 'No date'}`, 14, 34);
         doc.text(`To: ${date[1] || 'No date'}`, 14, 42);
         let startY = 50;
@@ -149,7 +153,6 @@ function DepartmentSummary() {
 
     return (
         <div className="container mt-4">
-            <h2 className="text-center mb-4">Department-wise Summary</h2>
             <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
                 <h2 className="mb-4 fw-bold text-c-primary text-center">Department-wise Summary</h2>
                 <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
@@ -158,7 +161,6 @@ function DepartmentSummary() {
 
                 <div className="row mb-3">
                     <div className="col-md-4 mb-1">
-                        
                         <label className='mb-2'>&nbsp;Category:</label>
                         <select
                             className="form-control"
@@ -169,13 +171,15 @@ function DepartmentSummary() {
                             }}
                         >
                             <option value="">Choose Category</option>
-                            <option value="ALL">ALL</option>
-                            <option value="Teaching Staff">Teaching Staff</option>
-                            <option value="Non Teaching Staff">Non Teaching Staff</option>
+                            {departments.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
                         </select>
                     </div>
 
-                    {(mainCategory === 'Teaching Staff' || mainCategory === 'Non Teaching Staff') && (
+                    {(mainCategory === 'Teaching Staff' ||
+                        mainCategory === 'Non Teaching Staff' ||
+                        mainCategory === 'Department Wise') && (
                         <div className="col-md-4 mb-2">
                             <label className='mb-2'>Department:</label>
                             <select
@@ -193,13 +197,7 @@ function DepartmentSummary() {
                     )}
                 </div>
 
-                <button
-                    className="btn btn-outline-primary mt-2 mb-3"
-                    onClick={handleSaveAsPDF}
-                    disabled={mainCategory === "" || (mainCategory !== "ALL" && selectedDept === "")}
-                >
-                    Save as PDF
-                </button>
+                
 
                 {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
                     <>

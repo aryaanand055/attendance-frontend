@@ -16,7 +16,7 @@ import IndividualAttendanceTable from './pages/IndividualAttendanceTable';
 import IndividualStaffReport from './pages/IndividualStaffReport';
 import LoginPage from './pages/LoginPage';
 import HRExcemptions from './pages/HRExcemptions';
-
+import DeviceManager from './pages/device';
 import {
   useAuth,
   AuthProvider
@@ -88,6 +88,9 @@ function AppContent() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/exemptions">Exemptions</Link>
                   </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/device">Device Manager</Link> 
+                  </li>
                 </ul>
               }
               {isAuthenticated && designation !== "HR" &&
@@ -143,6 +146,12 @@ function AppContent() {
               <HRExcemptions />
             </RequireHR>
           } />
+          <Route path="/device" element={
+            <RequireHR>
+              <DeviceManager />
+            </RequireHR>
+          } />
+         
           <Route path="/" element={
             isAuthenticated
               ? (designation === "HR"
