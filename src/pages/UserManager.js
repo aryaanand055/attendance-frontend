@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from '../axios';
 
-function DeviceManager() {
+function UserManager() {
   const TeachingStaff = ['CSE', 'ECE', 'MECH'];
   const NonTeachingStaff = ['ADMIN', 'LIBRARY'];
 
@@ -22,8 +22,6 @@ function DeviceManager() {
   const [addUserMsg, setAddUserMsg] = useState({ message: '', type: '' });
   const [deleteId, setDeleteId] = useState('');
   const [deleteUserMsg, setDeleteUserMsg] = useState({ message: '', type: '' });
-  const [deleteLogsMsg, setDeleteLogsMsg] = useState({ message: '', type: '' });
-
 
   const clearMessage = (setMsg) => {
     setTimeout(() => {
@@ -125,23 +123,12 @@ function DeviceManager() {
     }
   };
 
-  const handleDeleteLogs = async () => {
-    setDeleteLogsMsg({ message: '', type: '' });
-    try {
-      const res = await axios.post('/delete_logs');
-      setDeleteLogsMsg({ message: res.data.message, type: 'success' });
-      clearMessage(setDeleteLogsMsg);
-    } catch (err) {
-      setDeleteLogsMsg({ message: err.response?.data?.error || 'Delete logs failed', type: 'danger' });
-      clearMessage(setDeleteLogsMsg);
-    }
-  };
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Device Manager</h2>
+      <h2 className="mb-4">User Manager</h2>
 
-     
+
       <div className="card mb-4">
         <div className="card-header">Add User</div>
         <div className="card-body">
@@ -213,7 +200,7 @@ function DeviceManager() {
               <option value="Professor">Professor</option>
               <option value="HOD">HOD</option>
             </select>
-          
+
             <div className="mb-2">
               <select
                 className="form-control"
@@ -346,22 +333,9 @@ function DeviceManager() {
         </div>
       </div>
 
-      {/* Delete Logs Section */}
-      <div className="card mb-4">
-        <div className="card-header">Delete Logs</div>
-        <div className="card-body">
-          <button className="btn btn-warning" onClick={handleDeleteLogs}>
-            Delete Logs
-          </button>
-          {deleteLogsMsg.message && (
-            <div className={`mt-2 alert alert-${deleteLogsMsg.type}`}>
-              {deleteLogsMsg.message}
-            </div>
-          )}
-        </div>
-      </div>
+
     </div>
   );
 }
 
-export default DeviceManager;
+export default UserManager;

@@ -17,7 +17,7 @@ import IndividualStaffReport from './pages/IndividualStaffReport';
 import ExemptionApplyPage from './pages/applyExemption';
 import LoginPage from './pages/LoginPage';
 import HRExcemptions from './pages/HRExcemptions';
-import UserManager from './pages/device';
+import UserManager from './pages/UserManager';
 import {
   useAuth,
   AuthProvider

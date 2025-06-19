@@ -11,6 +11,7 @@ function IndividualAttendanceTable() {
     const [columnsToShow, setColumnsToShow] = useState([]);
     const [error, setError] = useState('');
     const [totalLateMins, setTotalLateMins] = useState(0);
+    const [filteredLateMins, setFilteredLateMins] = useState(0);
     const [markedDays, setMarkedDays] = useState(0);
 
     const handleChange = (e) => {
@@ -29,7 +30,7 @@ function IndividualAttendanceTable() {
                 id: formData.employeeId
             });
 
-            const { absent_marked, total_late_mins, data, timing } = res.data;
+            const { absent_marked, total_late_mins, data, timing, filtered_late_mins } = res.data;
 
             const employee = (data && data[0]) || {};
 
@@ -43,6 +44,7 @@ function IndividualAttendanceTable() {
             const visibleCols = allColumns.filter(col => (timing || []).some(row => row[col]));
             setMarkedDays(absent_marked || 0);
             setTotalLateMins(total_late_mins || 0);
+            setFilteredLateMins(filtered_late_mins || 0);
             setColumnsToShow(visibleCols);
             setRecords(timing || []);
             setSubmitted(true);
@@ -133,7 +135,8 @@ function IndividualAttendanceTable() {
                     <h4 className="mb-3">Attendance Records for {employeeInfo.name}</h4>
                     <p><strong>Category:</strong> {employeeInfo.category}</p>
                     <p><strong>Department:</strong> {employeeInfo.department}</p>
-                    <p><strong>Total Late Mins: </strong>{totalLateMins}</p>
+                    <p><strong>Total Late Mins(Since prev. reset): </strong>{totalLateMins}</p>
+                    <p><strong>Late minutes per filter: </strong>{filteredLateMins}</p>
                     <p><strong>Marked Days:</strong> {markedDays}</p>
                     <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
                         Save as PDF
