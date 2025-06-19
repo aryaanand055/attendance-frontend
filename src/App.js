@@ -17,7 +17,7 @@ import IndividualStaffReport from './pages/IndividualStaffReport';
 import ExemptionApplyPage from './pages/applyExemption';
 import LoginPage from './pages/LoginPage';
 import HRExcemptions from './pages/HRExcemptions';
-import DeviceManager from './pages/device';
+import UserManager from './pages/UserManager';
 import {
   useAuth,
   AuthProvider
@@ -77,20 +77,35 @@ function AppContent() {
             <div className="collapse navbar-collapse" id="navbarNav">
               {isAuthenticated && designation === "HR" &&
                 <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/view">Live Records</Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/summary">Department Summary</Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/individual">Individual Data</Link>
+                  <li className="nav-item dropdown"
+                    style={{ position: "relative" }}
+                    onMouseEnter={e => e.currentTarget.classList.add("show")}
+                    onMouseLeave={e => e.currentTarget.classList.remove("show")}>
+                    <button type="button" className="nav-link dropdown-toggle btn btn-link" id="attendanceDropdown"
+                      data-bs-toggle="dropdown" aria-expanded="false"
+                      style={{ textDecoration: "none" }}>
+                      Logs
+                    </button>
+                    <ul className="dropdown-menu show-on-hover " aria-labelledby="attendanceDropdown"
+                      style={{ position: "absolute", top: "100%", left: 0, zIndex: 1000, minWidth: "10rem", display: "none" }}>
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/view">Live</Link>
+                      </li>
+                      <hr className='hr c-hr' />
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/summary">Department</Link>
+                      </li>
+                      <hr className='hr c-hr' />
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/individual">Individual</Link>
+                      </li>
+                    </ul>
                   </li>
                   <li className="nav-item">
                     <Link className="nav-link" to="/exemptions">Exemptions</Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/device">Device Manager</Link> 
+                    <Link className="nav-link" to="/users">Users</Link>
                   </li>
                 </ul>
               }
@@ -104,7 +119,6 @@ function AppContent() {
                   </li>
                 </ul>
               }
-
 
               {isAuthenticated ? (
                 <button className="nav-link d-flex align-items-center btn btn-link" onClick={logout} title="Logout">
@@ -155,12 +169,12 @@ function AppContent() {
               <HRExcemptions />
             </RequireHR>
           } />
-          <Route path="/device" element={
+          <Route path="/users" element={
             <RequireHR>
-              <DeviceManager />
+              <UserManager />
             </RequireHR>
           } />
-         
+
           <Route path="/" element={
             isAuthenticated
               ? (designation === "HR"
@@ -170,7 +184,7 @@ function AppContent() {
           } />
         </Routes>
       </div>
-    </Router>
+    </Router >
   );
 }
 
