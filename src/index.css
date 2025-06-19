@@ -104,3 +104,19 @@
   color: var(--color-6);
   font-weight: bold;
 }
+
+.dropdown-menu {
+  /* Box shadow except the top */
+  border: none;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-item.dropdown:hover .dropdown-menu,
+.nav-item.dropdown.show .dropdown-menu {
+  display: block !important;
+}
+
+.c-hr {
+  margin: 0.5rem auto;
+  width: 80%;
+}
