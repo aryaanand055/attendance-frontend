@@ -8,12 +8,17 @@ function HRExcemptions() {
     const { showAlert } = useAlert();
     const todayDate = new Date().toISOString().split('T')[0];
 
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     const [selectedSessions, setSelectedSessions] = useState([]);
     const [exemptions, setExemptions] = useState([]);
     const [filteredExemptions, setFilteredExemptions] = useState([]);
-    const [date, setDate] = useState('');
     const [status, setStatus] = useState('');
     const [staffId, setStaffId] = useState('');
+    const [startDate, setStartDate] = useState(firstDay.toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(lastDay.toISOString().split('T')[0]);
+    const [staffName, setStaffName] = useState('');
 
     const [formData, setFormData] = useState({
         staffId: '',
@@ -21,41 +26,70 @@ function HRExcemptions() {
         exemptionSession: [],
         exemptionDate: todayDate,
         exemptionReason: '',
-        otherReason: '',
-        start_time: '',
-        end_time: ''
+        otherReason: null,
+        start_time: null,
+        end_time: null
     });
 
-    useEffect(() => {
-        const fetchExemptions = async () => {
-            try {
-                const res = await axios.get("/hr_exemptions_all");
-                if (res.data.message === "Exemptions fetched successfully") {
-                    setExemptions(res.data.exemptions);
-                } else {
-                    showAlert('Failed to fetch exemptions', 'error');
-                }
-            } catch (error) {
+    const fetchExemptions = async () => {
+        try {
+            const res = await axios.get("/hr_exemptions_all");
+            if (res.data.message === "Exemptions fetched successfully") {
+                setExemptions(res.data.exemptions);
+            } else {
                 showAlert('Failed to fetch exemptions', 'error');
-                console.error("Error fetching exemptions:", error);
+            }
+        } catch (error) {
+            showAlert('Failed to fetch exemptions', 'error');
+            console.error("Error fetching exemptions:", error);
+        }
+    };
+    useEffect(() => {
+        const fetchStaffName = async () => {
+            if (formData.staffId && formData.staffId.length > 2) {
+                try {
+                    const res = await axios.post('/search/getuser', { staffId: formData.staffId });
+                    if (res.data && res.data.staff && res.data.staff.name) {
+                        setStaffName(res.data.staff.name);
+                    } else {
+                        setStaffName('');
+                    }
+                } catch (err) {
+                    setStaffName('');
+                }
+            } else {
+                setStaffName('');
             }
         };
+        fetchStaffName();
+    }, [formData.staffId]);
+
+    useEffect(() => {
         fetchExemptions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showAlert]);
 
     useEffect(() => {
         let filtered = exemptions;
-        if (date) {
-            filtered = filtered.filter(exemption => exemption.exemptionDate === date);
+        if (startDate && endDate) {
+            filtered = filtered.filter(exemption => {
+                return exemption.exemptionDate >= startDate && exemption.exemptionDate <= endDate;
+            });
+        } else if (startDate) {
+            filtered = filtered.filter(exemption => exemption.exemptionDate >= startDate);
+        } else if (endDate) {
+            filtered = filtered.filter(exemption => exemption.exemptionDate <= endDate);
         }
         if (status) {
             filtered = filtered.filter(exemption => exemption.exemptionStatus === status);
         }
         if (staffId) {
-            filtered = filtered.filter(exemption => exemption.staffId === staffId);
+            filtered = filtered.filter(exemption =>
+                exemption.staffId && exemption.staffId.toLowerCase().includes(staffId.toLowerCase())
+            );
         }
         setFilteredExemptions(filtered);
-    }, [date, status, staffId, exemptions]);
+    }, [startDate, endDate, status, staffId, exemptions]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -65,23 +99,26 @@ function HRExcemptions() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("/hr_exemptions", {
+            const res = await axios.post("/applyExemption", {
                 ...formData,
-                exemptionSession: formData.exemptionType === 'session' ? selectedSessions : []
+                exemptionStatus: 'approved',
+                exemptionSession: formData.exemptionType === 'Session' ? selectedSessions : []
             });
             if (res.data.message === "Exemption added successfully") {
                 showAlert('Exemption added successfully!', 'success');
                 setFormData({
                     staffId: '',
-                    exemptionType: 'day',
+                    exemptionType: 'Day',
                     exemptionSession: [],
                     exemptionDate: todayDate,
                     exemptionReason: '',
-                    otherReason: '',
-                    start_time: '',
-                    end_time: ''
+                    otherReason: null,
+                    start_time: null,
+                    end_time: null,
+
                 });
                 setSelectedSessions([]);
+                fetchExemptions();
             } else {
                 showAlert('Failed to add exemption', 'error');
             }
@@ -119,8 +156,10 @@ function HRExcemptions() {
 
     const modifyExemption = async (index, action) => {
         const updated = [...exemptions];
+        const exemptionId = updated[index].exemptionId;
+        console.log(`Exemption ID: ${exemptionId}, Action: ${action}`);
         if (action === "approve") {
-            const res = await axios.post("/hr_exemptions/approve", { staffId: updated[index].staffId, date: updated[index].exemptionDate, selectedSessions: updated[index].exemptionSession });
+            const res = await axios.post("/hr_exemptions/approve", { exemptionId });
             if (res.data.message !== "Exemption approved successfully") {
                 showAlert('Failed to approve exemption', 'error');
                 return;
@@ -128,7 +167,7 @@ function HRExcemptions() {
             showAlert('Exemption approved successfully!', 'success');
             updated[index].exemptionStatus = 'approved';
         } else {
-            const res = await axios.post("/hr_exemptions/reject", { staffId: updated[index].staffId, date: updated[index].exemptionDate, selectedSessions: updated[index].exemptionSession });
+            const res = await axios.post("/hr_exemptions/reject", { exemptionId });
             if (res.data.message !== "Exemption rejected successfully") {
                 showAlert('Failed to reject exemption', 'error');
                 return;
@@ -139,7 +178,7 @@ function HRExcemptions() {
         setExemptions(updated);
     };
 
-    
+
     const downloadPDF = () => {
         const doc = new jsPDF();
         doc.text("Exemptions", 14, 16);
@@ -175,26 +214,44 @@ function HRExcemptions() {
             <hr className='hr w-75 m-auto my-4 '></hr>
 
             <div className="mb-5 p-4 rounded-3 bg-light border">
-                <h4 className="mb-3 text-secondary">View Exemptions</h4>
-                <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
-                    <input type="date" className="form-control" style={{ maxWidth: 180 }} onChange={(e) => setDate(e.target.value)} />
-                    <select className="form-select" style={{ maxWidth: 180 }} onChange={(e) => setStatus(e.target.value)}>
-                        <option value="">All</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="pending">Pending</option>
-                    </select>
-                    <input
-                        type="text"
-                        className="form-control"
-                        style={{ maxWidth: 180 }}
-                        placeholder="Enter Staff ID"
-                        onChange={(e) => setStaffId(e.target.value)}
-                    />
-                    <button className="btn btn-outline-primary ms-auto" onClick={downloadPDF} type="button">
+                <div className="w-100 d-flex justify-content-between">
+                    <h4 className="mb-3 text-secondary">View Exemptions</h4>
+                    <button className="btn btn-outline-primary float-end" onClick={downloadPDF} type="button">
                         Download PDF
                     </button>
                 </div>
+                <div className="col-auto">
+                    <label className="form-label fw-bold ">Filter by:</label>
+                </div>
+                <div className="row g-3 align-items-end mb-4">
+                    <div className="col-md-3 col-6">
+                        <label className='form-label mb-1'>From Date:</label>
+                        <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                    </div>
+                    <div className="col-md-3 col-6">
+                        <label className='form-label mb-1'>To Date:</label>
+                        <input type="date" className="form-control" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                    </div>
+                    <div className="col-md-3 col-6">
+                        <label className="form-label mb-1">Status:</label>
+                        <select className="form-select" onChange={(e) => setStatus(e.target.value)}>
+                            <option value="">All</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div className="col-md-3 col-6">
+                        <label className="form-label mb-1">Staff ID:</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Enter Staff ID"
+                            onChange={(e) => setStaffId(e.target.value)}
+                        />
+                    </div>
+                </div>
+
                 <div className="table-responsive rounded-3 border">
                     <table className='table table-c align-middle mb-0'>
                         <thead className="table-secondary">
@@ -215,18 +272,18 @@ function HRExcemptions() {
                             ) : (
                                 filteredExemptions.map((exemption, index) => {
                                     return (
-                                        <tr key={index} className="exemption-row">
+                                        <tr key={index} className="exemption-row" id={`${exemption.exemptionId}`}>
                                             <td>{exemption.staffId}</td>
                                             <td>{exemption.exemptionType}</td>
                                             <td>{exemption.exemptionDate}</td>
-                                            <td>{exemption.exemptionSession || <span className="text-muted">-</span>}</td>
+                                            <td>{exemption.exemptionSession || <span className="text-muted">-------</span>}</td>
                                             <td>
                                                 {(exemption.start_time && exemption.end_time)
                                                     ? `${exemption.start_time} - ${exemption.end_time}`
-                                                    : <span className="text-muted">-</span>
+                                                    : <span className="text-muted">-----</span>
                                                 }
                                             </td>
-                                            <td>{exemption.exemptionReason === 'Other' ? <span className="fst-italic">Other</span> : exemption.exemptionReason}</td>
+                                            <td>{exemption.exemptionReason === 'Other' ? <span className="fst-italic">{exemption.otherReason}</span> : exemption.exemptionReason}</td>
                                             <td>
                                                 {exemption.exemptionStatus === 'approved' ? (
                                                     <span className="badge bg-success">Approved</span>
@@ -266,7 +323,9 @@ function HRExcemptions() {
                     </table>
                 </div>
             </div>
-           
+
+
+            {/* Add Exemption */}
             <div className="p-4 rounded-3 bg-light border">
                 <h4 className="mb-3 text-secondary">Add a new exemption</h4>
                 <form onSubmit={handleSubmit} className="row g-3">
@@ -281,6 +340,9 @@ function HRExcemptions() {
                             placeholder="Enter Staff ID"
                             required
                         />
+                        {staffName && (
+                            <div className="mt-1 text-primary small">{staffName}</div>
+                        )}
                     </div>
                     <div className="col-md-4">
                         <label htmlFor="exemptionType" className="form-label fw-medium">Exemption Type</label>
@@ -288,16 +350,16 @@ function HRExcemptions() {
                             setFormData(prev => ({ ...prev, exemptionType: e.target.value }));
                             setSelectedSessions([]);
                         }} required>
-                            <option value="time">Time</option>
-                            <option value="day">Day</option>
-                            <option value="session">Session</option>
+                            <option value="Time">Time</option>
+                            <option value="Day">Day</option>
+                            <option value="Session">Session</option>
                         </select>
                     </div>
                     <div className="col-md-4">
                         <label htmlFor="exemptionDate" className="form-label fw-medium">Date</label>
                         <input type="date" className="form-control" id="exemptionDate" name="exemptionDate" value={formData.exemptionDate} onChange={handleChange} required />
                     </div>
-                    {formData.exemptionType === 'session' && (
+                    {formData.exemptionType === 'Session' && (
                         <div className="col-12">
                             <label className="form-label fw-medium">Session(s)</label>
                             <div className="d-flex flex-wrap gap-3">
@@ -319,7 +381,7 @@ function HRExcemptions() {
                             </div>
                         </div>
                     )}
-                    {formData.exemptionType === 'time' && (
+                    {formData.exemptionType === 'Time' && (
                         <div className="col-md-6">
                             <div className="row">
                                 <div className="col-6">
@@ -351,9 +413,9 @@ function HRExcemptions() {
                         <label htmlFor="exemptionReason" className="form-label fw-medium">Reason</label>
                         <select className="form-select" id="exemptionReason" name="exemptionReason" value={formData.exemptionReason} onChange={handleChange} required>
                             <option value="">Select Reason</option>
-                            <option value="medical">Medical</option>
-                            <option value="personal">Personal</option>
-                            <option value="family">Family Emergency</option>
+                            <option value="Medical">Medical</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Family">Family Emergency</option>
                             <option value="Other">Other</option>
                         </select>
                         {formData.exemptionReason === 'Other' && (

@@ -1,30 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../axios';
 
 import { useAlert } from '../components/AlertProvider';
 import { useAuth } from '../auth/authProvider';
 
 function ApplyExemption() {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const [selectedSessions, setSelectedSessions] = useState([]);
+    const [exemptions, setExemptions] = useState([]);
+    const [filteredExemptions, setFilteredExemptions] = useState([]);
+    const [status, setStatus] = useState('');
+    const [startDate, setStartDate] = useState(firstDay.toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(lastDay.toISOString().split('T')[0]);
     const { showAlert } = useAlert();
     const todayDate = new Date().toISOString().split('T')[0];
-
-    const [selectedSessions, setSelectedSessions] = useState([]);
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
-        exemptionType: 'day',
+        exemptionType: 'Day',
         staffId: '',
         exemptionSession: [],
         exemptionDate: todayDate,
         exemptionReason: '',
-        otherReason: '',
-        start_time: '',
-        end_time: ''
+        otherReason: null,
+        start_time: null,
+        end_time: null,
+        exemptionStatus: 'pending'
     });
-    const { user } = useAuth();
-    React.useEffect(() => {
-        if (user) {
-            setFormData(prev => ({ ...prev, staffId: user.staffId }));
+
+    const fetchExemptions = async () => {
+        if (!user || !user.staffId) return;
+        try {
+            const res = await axios.get(`/staff_exemptions/${user.staffId}`);
+            showAlert('Exemptions fetched successfully', 'success');
+            if (res.data && Array.isArray(res.data.exemptions)) {
+                setExemptions(res.data.exemptions);
+            } else {
+                setExemptions([]);
+            }
+        } catch (error) {
+            showAlert('Failed to fetch your exemptions', 'error');
         }
+    };
+
+    useEffect(() => {
+        if (user && user.staffId) {
+            setFormData(prev => ({ ...prev, staffId: user.staffId }));
+            fetchExemptions();
+        }
+        // eslint-disable-next-line
     }, [user]);
+
+    useEffect(() => {
+        let filtered = exemptions;
+        if (startDate && endDate) {
+            filtered = filtered.filter(exemption =>
+                exemption.exemptionDate >= startDate && exemption.exemptionDate <= endDate
+            );
+        } else if (startDate) {
+            filtered = filtered.filter(exemption => exemption.exemptionDate >= startDate);
+        } else if (endDate) {
+            filtered = filtered.filter(exemption => exemption.exemptionDate <= endDate);
+        }
+        if (status) {
+            filtered = filtered.filter(exemption => exemption.exemptionStatus === status);
+        }
+        setFilteredExemptions(filtered);
+    }, [startDate, endDate, status, exemptions]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -37,6 +80,17 @@ function ApplyExemption() {
             const res = await axios.post("/applyExemption", formData);
             if (res.data.message === "Exemption added successfully") {
                 showAlert('Exemption added successfully!', 'success');
+                setFormData({
+                    exemptionType: 'Day',
+                    exemptionSession: [],
+                    exemptionDate: todayDate,
+                    exemptionReason: '',
+                    otherReason: null,
+                    start_time: null,
+                    end_time: null,
+                });
+                setSelectedSessions([]);
+                fetchExemptions();
             } else {
                 showAlert('Failed to add exemption', 'error');
                 throw new Error("Failed to add exemption");
@@ -77,8 +131,73 @@ function ApplyExemption() {
             <h2 className="mb-4 fw-bold text-c-primary text-center">Exemptions</h2>
             <hr className='hr w-75 m-auto my-4 '></hr>
 
+            <div className="p-4 rounded-3 bg-light border mb-4">
+                <h4 className="mb-3 text-secondary">Applied Exemptions</h4>
+                <div className="col-auto">
+                    <label className="form-label fw-bold ">Filter by:</label>
+                </div>
+                <div className="row g-3 align-items-end mb-4">
+                    <div className="col-md-4 col-6">
+                        <label className='form-label mb-1'>From Date:</label>
+                        <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                    </div>
+                    <div className="col-md-4 col-6">
+                        <label className='form-label mb-1'>To Date:</label>
+                        <input type="date" className="form-control" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                    </div>
+                    <div className="col-md-4 col-6">
+                        <label className="form-label mb-1">Status:</label>
+                        <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+                            <option value="">All</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="table-responsive rounded-3 border">
+                    <table className='table table-c align-middle mb-0'>
+                        <thead className="table-secondary">
+                            <tr>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Session(s)</th>
+                                <th>Time</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredExemptions.length === 0 ? (
+                                <tr><td colSpan="6" className="text-center">No exemptions found</td></tr>
+                            ) : (
+                                filteredExemptions.map((exemption, index) => (
+                                    <tr key={index} className="exemption-row">
+                                        <td>{exemption.exemptionType}</td>
+                                        <td>{exemption.exemptionDate}</td>
+                                        <td>{exemption.exemptionSession && exemption.exemptionSession.length > 0 ? exemption.exemptionSession : <span className="text-muted">-------</span>}</td>
+                                        <td>{(exemption.start_time && exemption.end_time) ? `${exemption.start_time} - ${exemption.end_time}` : <span className="text-muted">-----</span>}</td>
+                                        <td>{exemption.exemptionReason === 'Other' ? <span className="fst-italic">{exemption.otherReason}</span> : exemption.exemptionReason}</td>
+                                        <td>
+                                            {exemption.exemptionStatus === 'approved' ? (
+                                                <span className="badge bg-success">Approved</span>
+                                            ) : (exemption.exemptionStatus === 'rejected') ? (
+                                                <span className="badge bg-danger">Rejected</span>
+                                            ) : (
+                                                <span className="badge bg-warning text-dark">Pending</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div className="p-4 rounded-3 bg-light border">
                 <h4 className="mb-3 text-secondary">Apply exemption</h4>
+                <p className='text-muted'>You can apply for exemptions for specific dates and times.</p>
                 <form onSubmit={handleSubmit} className="row g-4">
                     <div className="col-md-4">
                         <label htmlFor="userSelect" className="form-label fw-medium">User</label>
@@ -103,9 +222,9 @@ function ApplyExemption() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="day">Day</option>
-                            <option value="session">Session</option>
-                            <option value="time">Time</option>
+                            <option value="Day">Day</option>
+                            <option value="Session">Session</option>
+                            <option value="Time">Time</option>
                         </select>
                     </div>
                     <div className="col-md-4">
@@ -121,7 +240,7 @@ function ApplyExemption() {
                         />
                     </div>
 
-                    {formData.exemptionType === 'session' && (
+                    {formData.exemptionType === 'Session' && (
                         <div className="col-12">
                             <label className="form-label fw-medium">Session(s)</label>
                             <div className="row">
@@ -146,7 +265,7 @@ function ApplyExemption() {
                         </div>
                     )}
 
-                    {formData.exemptionType === 'time' && (
+                    {formData.exemptionType === 'Time' && (
                         <div className="col-md-6">
                             <div className="row">
                                 <div className="col-6">
