@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../axios';
-
+import PageWrapper from '../components/PageWrapper';
 import { useAlert } from '../components/AlertProvider';
 import { useAuth } from '../auth/authProvider';
 
@@ -127,10 +127,7 @@ function ApplyExemption() {
     };
 
     return (
-        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
-            <h2 className="mb-4 fw-bold text-c-primary text-center">Exemptions</h2>
-            <hr className='hr w-75 m-auto my-4 '></hr>
-
+        <PageWrapper title="Exemptions">
             <div className="p-4 rounded-3 bg-light border mb-4">
                 <h4 className="mb-3 text-secondary">Applied Exemptions</h4>
                 <div className="col-auto">
@@ -330,7 +327,7 @@ function ApplyExemption() {
                     </div>
                 </form>
             </div>
-        </div>
+        </PageWrapper>
     );
 }
 export default ApplyExemption;

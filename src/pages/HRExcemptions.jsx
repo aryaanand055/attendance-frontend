@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../axios';
 import { useAlert } from '../components/AlertProvider';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import PageWrapper from '../components/PageWrapper';
 
 function HRExcemptions() {
     const { showAlert } = useAlert();
@@ -209,10 +210,7 @@ function HRExcemptions() {
     };
 
     return (
-        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
-            <h2 className="mb-4 fw-bold text-c-primary text-center">Exemptions</h2>
-            <hr className='hr w-75 m-auto my-4 '></hr>
-
+        <PageWrapper title="Exemptions">
             <div className="mb-5 p-4 rounded-3 bg-light border">
                 <div className="w-100 d-flex justify-content-between">
                     <h4 className="mb-3 text-secondary">View Exemptions</h4>
@@ -252,7 +250,7 @@ function HRExcemptions() {
                     </div>
                 </div>
 
-                <div className="table-responsive rounded-3 border">
+                <div className="table-responsive rounded-3">
                     <table className='table table-c align-middle mb-0'>
                         <thead className="table-secondary">
                             <tr>
@@ -323,7 +321,6 @@ function HRExcemptions() {
                     </table>
                 </div>
             </div>
-
 
             {/* Add Exemption */}
             <div className="p-4 rounded-3 bg-light border">
@@ -437,7 +434,7 @@ function HRExcemptions() {
                     </div>
                 </form>
             </div>
-        </div>
+        </PageWrapper>
     );
 }
 export default HRExcemptions;

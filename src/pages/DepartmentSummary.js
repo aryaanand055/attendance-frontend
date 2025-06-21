@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from '../axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import PageWrapper from '../components/PageWrapper';
 
 function DepartmentSummary() {
     const [mainCategory, setMainCategory] = useState('');
@@ -10,7 +11,7 @@ function DepartmentSummary() {
     const [date, setDate] = useState([]);
 
     const allDepartments = ["CSE", "ECE", "MECH"];
-    const nonTeachingDepartments = ["ADMIN", "LIBRARY", "ECE" , "CSE"];
+    const nonTeachingDepartments = ["ADMIN", "LIBRARY", "ECE", "CSE"];
     const departments = [
         "ALL",
         "Teaching Staff",
@@ -33,7 +34,7 @@ function DepartmentSummary() {
 
         if (mainCategory === "Department Wise" && selectedDept) {
             deptToSend = selectedDept;
-            categoryToSend = ""; 
+            categoryToSend = "";
         } else if (
             (mainCategory === "Teaching Staff" || mainCategory === "Non Teaching Staff") &&
             selectedDept && selectedDept !== "ALL"
@@ -159,34 +160,32 @@ function DepartmentSummary() {
     );
 
     return (
-        <div className="container mt-4">
-            <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
-                <h2 className="mb-4 fw-bold text-c-primary text-center">Department-wise Summary</h2>
-                <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
-                    Save as PDF
-                </button>
+        <PageWrapper title="Department-wise Summary">
+            <button className="btn btn-outline-secondary mb-3" onClick={handleSaveAsPDF}>
+                Save as PDF
+            </button>
 
-                <div className="row mb-3">
-                    <div className="col-md-4 mb-1">
-                        <label className='mb-2'>&nbsp;Category:</label>
-                        <select
-                            className="form-control"
-                            value={mainCategory}
-                            onChange={(e) => {
-                                setMainCategory(e.target.value);
-                                setSelectedDept('');
-                            }}
-                        >
-                            <option value="">Choose Category</option>
-                            {departments.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
-                            ))}
-                        </select>
-                    </div>
+            <div className="row mb-3">
+                <div className="col-md-4 mb-1">
+                    <label className='mb-2'>&nbsp;Category:</label>
+                    <select
+                        className="form-control"
+                        value={mainCategory}
+                        onChange={(e) => {
+                            setMainCategory(e.target.value);
+                            setSelectedDept('');
+                        }}
+                    >
+                        <option value="">Choose Category</option>
+                        {departments.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                </div>
 
-                    {(mainCategory === 'Teaching Staff' ||
-                        mainCategory === 'Non Teaching Staff' ||
-                        mainCategory === 'Department Wise') && (
+                {(mainCategory === 'Teaching Staff' ||
+                    mainCategory === 'Non Teaching Staff' ||
+                    mainCategory === 'Department Wise') && (
                         <div className="col-md-4 mb-2">
                             <label className='mb-2'>Department:</label>
                             <select
@@ -202,46 +201,45 @@ function DepartmentSummary() {
                             </select>
                         </div>
                     )}
-                </div>
-
-                {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
-                    <>
-                        <div className="col-md-4 mb-2">
-                            <div className="date-range-container d-flex align-items-center gap-2">
-                                <label className="me-2">From:</label>
-                                <input
-                                    type="text"
-                                    className="form-control me-3"
-                                    value={date[0] || 'No date'}
-                                    readOnly
-                                />
-                                <label className="me-2">To:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={date[1] || 'No date'}
-                                    readOnly
-                                />
-                            </div>
-                        </div>
-
-                        {mainCategory === "ALL"
-                            ? Object.entries(summaryData).map(([categoryName, departments]) =>
-                                renderCategory(categoryName, departments)
-                            )
-                            : Object.entries(summaryData).map(([deptName, employees]) =>
-                                renderTable(deptName, employees)
-                            )}
-                    </>
-                ) : mainCategory === "" ? (
-                    <div className="alert alert-info mt-3">Please select a category to view the summary.</div>
-                ) : (mainCategory !== "ALL" && selectedDept === "") ? (
-                    <div className="alert alert-info mt-3">Please choose a department.</div>
-                ) : (
-                    <div className="alert alert-info mt-3">No data available for the selected department.</div>
-                )}
             </div>
-        </div>
+
+            {mainCategory && ((mainCategory === "ALL") || (selectedDept !== "")) && Object.keys(summaryData).length > 0 ? (
+                <>
+                    <div className="col-md-4 mb-2">
+                        <div className="date-range-container d-flex align-items-center gap-2">
+                            <label className="me-2">From:</label>
+                            <input
+                                type="text"
+                                className="form-control me-3"
+                                value={date[0] || 'No date'}
+                                readOnly
+                            />
+                            <label className="me-2">To:</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={date[1] || 'No date'}
+                                readOnly
+                            />
+                        </div>
+                    </div>
+
+                    {mainCategory === "ALL"
+                        ? Object.entries(summaryData).map(([categoryName, departments]) =>
+                            renderCategory(categoryName, departments)
+                        )
+                        : Object.entries(summaryData).map(([deptName, employees]) =>
+                            renderTable(deptName, employees)
+                        )}
+                </>
+            ) : mainCategory === "" ? (
+                <div className="alert alert-info mt-3">Please select a category to view the summary.</div>
+            ) : (mainCategory !== "ALL" && selectedDept === "") ? (
+                <div className="alert alert-info mt-3">Please choose a department.</div>
+            ) : (
+                <div className="alert alert-info mt-3">No data available for the selected department.</div>
+            )}
+        </PageWrapper >
     );
 }
 

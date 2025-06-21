@@ -3,6 +3,7 @@ import axios from '../axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useAuth } from '../auth/authProvider';
+import PageWrapper from '../components/PageWrapper';
 
 function IndividualAttendanceTable() {
     const { user } = useAuth();
@@ -104,9 +105,8 @@ function IndividualAttendanceTable() {
     }, [formData.startDate, formData.endDate, formData.employeeId]);
 
     return (
-        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
-            <h3 className="mb-4 fw-bold text-c-primary text-center">Attendance Report for {staffInfo.name}</h3>
-            <hr className='hr w-75 m-auto my-4 '></hr>
+
+        <PageWrapper title="Attendance Report for {staffInfo.name}">
 
             <form className="mb-4">
                 <div className="row mb-3">
@@ -165,7 +165,7 @@ function IndividualAttendanceTable() {
                     </table>
                 </>
             )}
-        </div>
+        </PageWrapper>
     );
 }
 

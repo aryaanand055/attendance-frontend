@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from '../axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import PageWrapper from '../components/PageWrapper';
 
 function IndividualAttendanceTable() {
     const [formData, setFormData] = useState({ startDate: '', endDate: '', employeeId: '' });
@@ -107,10 +108,7 @@ function IndividualAttendanceTable() {
     }, [formData.startDate, formData.endDate, formData.employeeId]);
 
     return (
-        <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
-            <h3 className="mb-4 fw-bold text-c-primary text-center">Individual Attendance</h3>
-            <hr className='hr w-75 m-auto my-4 '></hr>
-
+        <PageWrapper title="Individual Attendance">
             <form onSubmit={handleSubmit} className="mb-4">
                 <div className="row mb-3">
                     <div className="col">
@@ -175,7 +173,7 @@ function IndividualAttendanceTable() {
                     </table>
                 </>
             )}
-        </div>
+        </PageWrapper>
     );
 }
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // import { useNavigate, useLocation } from 'react-router-dom';
 
 import { useNavigate } from 'react-router-dom';
-
+import PageWrapper from '../components/PageWrapper';
 import { useAuth } from '../auth/authProvider';
 import { useAlert } from '../components/AlertProvider';
 
@@ -45,8 +45,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="container mt-5 mb-5 p-5 rounded-4 shadow-lg bg-white bg-opacity-75" style={{ maxWidth: '400px' }}>
-      <h3 className="mb-4 text-c-primary">Login</h3>
+    <PageWrapper title="Login">
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label fw-medium">User ID</label>
@@ -72,7 +71,7 @@ function LoginPage() {
         </div>
         <button type="submit" className="btn btn-primary w-100 btn-c-primary">Login</button>
       </form>
-    </div>
+    </PageWrapper>
   );
 }
 

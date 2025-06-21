@@ -94,6 +94,33 @@
   box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.1);
 }
 
+.btn-c-primary:focus {
+  color: var(--color-6);
+  background-color: var(--secondary);
+  box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.3);
+}
+
+.btn-c-secondary {
+  background-color: var(--secondary);
+  color: var(--color-6);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-c-secondary:hover {
+  color: var(--color-6);
+  background-color: var(--primary);
+  box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-c-secondary:focus {
+  color: var(--color-6);
+  background-color: var(--primary);
+  box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.3);
+}
+
 .text-c-primary {
   color: var(--primary);
 }

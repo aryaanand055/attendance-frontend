@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from '../axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import PageWrapper from '../components/PageWrapper';
 
 function AttendanceViewer() {
   const [selectedDate, setSelectedDate] = useState("");
@@ -68,20 +69,16 @@ function AttendanceViewer() {
   };
 
   return (
-    <div className="container mt-5 mb-5 p-4 rounded-4 shadow-lg bg-white bg-opacity-75">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-4 fw-bold text-c-primary text-center">Live Attendance Logs</h2>
-
-        <div className="form-group mb-0">
-          <label htmlFor="date" className="form-label me-2">Select Date:</label>
-          <input
-            type="date"
-            className="form-control"
-            id="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-        </div>
+    <PageWrapper title="Live Logs">
+      <div className="form-group mb-0">
+        <label htmlFor="date" className="form-label me-2">Select Date:</label>
+        <input
+          type="date"
+          className="form-control"
+          id="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
       </div>
       <hr className='hr w-75 m-auto my-4 '></hr>
 
@@ -122,7 +119,8 @@ function AttendanceViewer() {
           )}
         </tbody>
       </table>
-    </div>
+
+    </PageWrapper >
   );
 }
 
