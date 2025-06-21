@@ -18,6 +18,7 @@ import ExemptionApplyPage from './pages/applyExemption';
 import LoginPage from './pages/LoginPage';
 import HRExcemptions from './pages/HRExcemptions';
 import UserManager from './pages/UserManager';
+import CategoryManager from './pages/CategoryManager'
 import {
   useAuth,
   AuthProvider
@@ -104,9 +105,27 @@ function AppContent() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/exemptions">Exemptions</Link>
                   </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/users">Users</Link>
+                  <li className="nav-item dropdown"
+                    style={{ position: "relative" }}
+                    onMouseEnter={e => e.currentTarget.classList.add("show")}
+                    onMouseLeave={e => e.currentTarget.classList.remove("show")}>
+                    <button type="button" className="nav-link dropdown-toggle btn btn-link" id="attendanceDropdown"
+                      data-bs-toggle="dropdown" aria-expanded="false"
+                      style={{ textDecoration: "none" }}>
+                      Users
+                    </button>
+                    <ul className="dropdown-menu show-on-hover " aria-labelledby="attendanceDropdown"
+                      style={{ position: "absolute", top: "100%", left: 0, zIndex: 1000, minWidth: "10rem", display: "none" }}>
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/users">User</Link>
+                      </li>
+                      <hr className='hr c-hr' />
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/categories">Category</Link>
+                      </li>
+                    </ul>
                   </li>
+
                 </ul>
               }
               {isAuthenticated && designation !== "HR" &&
@@ -172,6 +191,11 @@ function AppContent() {
           <Route path="/users" element={
             <RequireHR>
               <UserManager />
+            </RequireHR>
+          } />
+          <Route path="/categories" element={
+            <RequireHR>
+              <CategoryManager />
             </RequireHR>
           } />
 

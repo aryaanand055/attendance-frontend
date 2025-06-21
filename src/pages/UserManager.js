@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import axios from '../axios';
 
+import { useAlert } from '../components/AlertProvider';
+
 function UserManager() {
+
+  const { showAlert } = useAlert();
   const TeachingStaff = ['CSE', 'ECE', 'MECH'];
   const NonTeachingStaff = ['ADMIN', 'LIBRARY'];
 
@@ -19,15 +23,7 @@ function UserManager() {
     breakout: '',
   });
 
-  const [addUserMsg, setAddUserMsg] = useState({ message: '', type: '' });
   const [deleteId, setDeleteId] = useState('');
-  const [deleteUserMsg, setDeleteUserMsg] = useState({ message: '', type: '' });
-
-  const clearMessage = (setMsg) => {
-    setTimeout(() => {
-      setMsg({ message: '', type: '' });
-    }, 5000);
-  };
 
   const handleWorkingTypeChange = (e) => {
     const working_type = e.target.value;
@@ -61,65 +57,50 @@ function UserManager() {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    setAddUserMsg({ message: '', type: '' });
     if (!/^[A-Za-z]\d+$/.test(addUser.id)) {
-      setAddUserMsg({ message: 'Invalid ID format', type: 'danger' });
-      clearMessage(setAddUserMsg);
+      console.error("Error adding user: ")
+      showAlert("Invalid ID format", "danger");
       return;
     }
     try {
       const res = await axios.post('/add_user', addUser);
-      setAddUserMsg({ message: res.data.message, type: 'success' });
-      setAddUser({
-        id: '',
-        name: '',
-        dept: '',
-        designation: '',
-        staff_type: '',
-        working_type: '',
-        intime: '',
-        outtime: '',
-        breakmins: '',
-        breakin: '',
-        breakout: '',
-      });
-      clearMessage(setAddUserMsg);
+      if (res.data.success === true && res.data.message === 'User added successfully') {
+        showAlert(res.data.message, "success");
+        setAddUser({
+          id: '',
+          name: '',
+          dept: '',
+          designation: '',
+          staff_type: '',
+          working_type: '',
+          intime: '',
+          outtime: '',
+          breakmins: '',
+          breakin: '',
+          breakout: '',
+        });
+
+      }
     } catch (err) {
-      setAddUserMsg({ message: err.response?.data?.error || 'Add user failed', type: 'danger' });
-      setAddUser({
-        id: '',
-        name: '',
-        dept: '',
-        designation: '',
-        staff_type: '',
-        working_type: '',
-        intime: '',
-        outtime: '',
-        breakmins: '',
-        breakin: '',
-        breakout: '',
-      });
-      clearMessage(setAddUserMsg);
+      console.error("Error in adding user: ", err.response?.data?.error || 'Add user failed')
+      showAlert('Add user failed', "danger")
     }
   };
 
   const handleDeleteUser = async (e) => {
     e.preventDefault();
-    setDeleteUserMsg({ message: '', type: '' });
     if (!/^[A-Za-z]\d+$/.test(deleteId)) {
-      setDeleteUserMsg({ message: 'Invalid ID format', type: 'danger' });
-      clearMessage(setDeleteUserMsg);
+      showAlert('Invalid ID format', 'danger')
       return;
     }
     try {
       const res = await axios.post('/delete_user', { id: deleteId });
-      setDeleteUserMsg({ message: res.data.message, type: 'success' });
+      showAlert(res.data.message, 'success')
       setDeleteId('');
-      clearMessage(setDeleteUserMsg);
     } catch (err) {
-      setDeleteUserMsg({ message: err.response?.data?.error || 'Delete user failed', type: 'danger' });
+      showAlert('User deletion failed', "danger");
+      console.error(err.response?.data?.error || "User deleteion failed for unknown reason")
       setDeleteId('');
-      clearMessage(setDeleteUserMsg);
     }
   };
 
@@ -298,11 +279,6 @@ function UserManager() {
               Add User
             </button>
           </form>
-          {addUserMsg.message && (
-            <div className={`mt-2 alert alert-${addUserMsg.type}`}>
-              {addUserMsg.message}
-            </div>
-          )}
         </div>
       </div>
 
@@ -324,11 +300,7 @@ function UserManager() {
             <button className="btn btn-danger" type="submit">
               Delete User
             </button>
-            {deleteUserMsg.message && (
-              <div className={`mt-2 alert alert-${deleteUserMsg.type}`}>
-                {deleteUserMsg.message}
-              </div>
-            )}
+
           </form>
         </div>
       </div>

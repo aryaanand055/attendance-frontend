@@ -305,10 +305,10 @@ function ApplyExemption() {
                             required
                         >
                             <option value="">Select Reason</option>
-                            <option value="official">Official</option>
-                            <option value="medical">Medical</option>
-                            <option value="personal">Personal</option>
-                            <option value="family">Family Emergency</option>
+                            <option value="Official">Official</option>
+                            <option value="Medical">Medical</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Family">Family Emergency</option>
                             <option value="Other">Other</option>
                         </select>
                         {formData.exemptionReason === 'Other' && (
