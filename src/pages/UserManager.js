@@ -8,6 +8,8 @@ function UserManager() {
   const { showAlert } = useAlert();
   const TeachingStaff = ['CSE', 'ECE', 'MECH'];
   const NonTeachingStaff = ['ADMIN', 'LIBRARY'];
+  const [loading, setLoading] = useState(false);
+  const [loading1, setLoading1] = useState(false);
 
   const [addUser, setAddUser] = useState({
     id: '',
@@ -62,6 +64,7 @@ function UserManager() {
       showAlert("Invalid ID format", "danger");
       return;
     }
+    setLoading(true);
     try {
       const res = await axios.post('/add_user', addUser);
       if (res.data.success === true && res.data.message === 'User added successfully') {
@@ -84,6 +87,8 @@ function UserManager() {
     } catch (err) {
       console.error("Error in adding user: ", err.response?.data?.error || 'Add user failed')
       showAlert('Add user failed', "danger")
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,6 +98,7 @@ function UserManager() {
       showAlert('Invalid ID format', 'danger')
       return;
     }
+    setLoading1(true)
     try {
       const res = await axios.post('/delete_user', { id: deleteId });
       showAlert(res.data.message, 'success')
@@ -101,6 +107,8 @@ function UserManager() {
       showAlert('User deletion failed', "danger");
       console.error(err.response?.data?.error || "User deleteion failed for unknown reason")
       setDeleteId('');
+    } finally {
+      setLoading1(false)
     }
   };
 
@@ -275,9 +283,18 @@ function UserManager() {
                 </div>
               </>
             )}
-            <button className="btn btn-primary" type="submit">
-              Add User
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Adding...
+                </>
+              ) : (
+                "Add User"
+              )}
             </button>
+
+
           </form>
         </div>
       </div>
@@ -297,8 +314,16 @@ function UserManager() {
                 required
               />
             </div>
-            <button className="btn btn-danger" type="submit">
-              Delete User
+            <button className="btn btn-danger" type="submit" disabled={loading1}>
+              {loading1 ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Deleting...
+                </>
+              ) : (
+                "Delete User"
+              )}
+
             </button>
 
           </form>
