@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from '../axios';
 
 import PageWrapper from '../components/PageWrapper';
@@ -16,6 +16,7 @@ function UserManager() {
     id: '',
     name: '',
     dept: '',
+    category: '',
     designation: '',
     staff_type: '',
     working_type: '',
@@ -26,6 +27,27 @@ function UserManager() {
     breakout: '',
   });
   const [deleteId, setDeleteId] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("/categories");
+        if (res.data.success) {
+          setCategories(res.data.categories);
+
+        } else {
+          showAlert('Failed to fetch categories', 'error');
+        }
+      } catch (error) {
+        showAlert('Failed to fetch categories', 'error');
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleWorkingTypeChange = (e) => {
     const working_type = e.target.value;
@@ -57,22 +79,54 @@ function UserManager() {
     }
   };
 
+  const handleCategoryChange = (e) => {
+    const val = e.target.value;
+    setSelectedCategory(val);
+    console.log(val)
+    if (val !== 'custom') {
+      setAddUser(prev => ({
+        ...prev,
+        staff_type: '',
+        working_type: '',
+        intime: '',
+        outtime: '',
+        breakmins: '',
+        breakin: '',
+        breakout: ''
+      }));
+    }
+  };
+
+
   const handleAddUser = async (e) => {
     e.preventDefault();
+
     if (!/^[A-Za-z]\d+$/.test(addUser.id)) {
-      console.error("Error adding user: ")
       showAlert("Invalid ID format", "danger");
       return;
     }
+
+    const payload =
+      selectedCategory === 'custom'
+        ? { ...addUser, category: -1 }
+        : {
+          id: addUser.id,
+          name: addUser.name,
+          dept: addUser.dept,
+          designation: addUser.designation,
+          category: selectedCategory,
+        };
+
     setLoading(true);
     try {
-      const res = await axios.post('/add_user', addUser);
+      const res = await axios.post('/add_user', payload);
       if (res.data.success === true && res.data.message === 'User added successfully') {
         showAlert(res.data.message, "success");
         setAddUser({
           id: '',
           name: '',
           dept: '',
+          category: '',
           designation: '',
           staff_type: '',
           working_type: '',
@@ -82,15 +136,16 @@ function UserManager() {
           breakin: '',
           breakout: '',
         });
-
+        setSelectedCategory('');
       }
     } catch (err) {
-      console.error("Error in adding user: ", err.response?.data?.error || 'Add user failed')
-      showAlert('Add user failed', "danger")
+      console.error("Error in adding user: ", err.response.data || 'Add user failed');
+      showAlert('Add user failed', "danger");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleDeleteUser = async (e) => {
     e.preventDefault();
@@ -111,6 +166,23 @@ function UserManager() {
       setLoading1(false)
     }
   };
+  const formatTime = (timeStr) => {
+    if (timeStr === "0" || !timeStr) return "—";
+    const [hh, mm] = timeStr.split(':');
+    return `${hh}:${mm}`;
+  };
+
+  const categoryStaffType = useMemo(() => {
+    // eslint-disable-next-line eqeqeq
+    const selectedCategoryObj = categories.find(cat => toString(cat.category_no) == toString(selectedCategory));
+    if (!selectedCategoryObj) return '';
+
+    const desc = selectedCategoryObj.category_description.toLowerCase();
+    if (desc.includes('teaching')) {
+      return desc.includes('non') ? 'Non-Teaching Staff' : 'Teaching Staff';
+    }
+    return '';
+  }, [categories, selectedCategory]);
 
 
   return (
@@ -143,34 +215,26 @@ function UserManager() {
                 required
               />
             </div>
-            <div className="col-md-6">
-              <label className="form-label">Staff Type</label>
+
+            <div className='col-md-12'>
+              <label className='form-label'>Category</label>
               <select
-                className="form-select"
-                value={addUser.staff_type}
-                onChange={(e) => setAddUser({ ...addUser, staff_type: e.target.value, dept: '' })}
+                className='form-select'
+                value={selectedCategory}
+                onChange={handleCategoryChange}
                 required
               >
-                <option value="">Choose Staff Type</option>
-                <option value="Teaching Staff">Teaching Staff</option>
-                <option value="Non-Teaching Staff">Non-Teaching Staff</option>
-              </select>
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Department</label>
-              <select
-                className="form-select"
-                value={addUser.dept}
-                onChange={(e) => setAddUser({ ...addUser, dept: e.target.value })}
-                required
-                disabled={!addUser.staff_type}
-              >
-                <option value="">Choose Department</option>
-                {(addUser.staff_type === 'Teaching Staff' ? TeachingStaff : NonTeachingStaff).map((dept) => (
-                  <option key={dept} value={dept}>{dept}</option>
+                <option value="">Choose Category</option>
+                {categories.map((cat, index) => (
+                  <option key={index} value={cat.category_no}>
+                    {cat.category_no} - {cat.category_description} - {formatTime(cat.in_time)} - {formatTime(cat.break_in)} - {formatTime(cat.break_out)} - {formatTime(cat.out_time)} - {cat.break_time_mins}
+                  </option>
                 ))}
+                <option value="custom">Custom</option>
               </select>
             </div>
+
+
             <div className="col-md-6">
               <label className="form-label">Designation</label>
               <select
@@ -186,17 +250,63 @@ function UserManager() {
                 <option value="HOD">HOD</option>
               </select>
             </div>
+            {selectedCategory === 'custom' && (
+              <>
+                <div className="col-md-6">
+                  <label className="form-label">Staff Type</label>
+                  <select
+                    className="form-select"
+                    value={addUser.staff_type}
+                    onChange={(e) => setAddUser({ ...addUser, staff_type: e.target.value, dept: '' })}
+                    required
+                  >
+                    <option value="">Choose Staff Type</option>
+                    <option value="Teaching Staff">Teaching Staff</option>
+                    <option value="Non-Teaching Staff">Non-Teaching Staff</option>
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">Working Type</label>
+                  <select
+                    className="form-select"
+                    value={addUser.working_type}
+                    onChange={handleWorkingTypeChange}
+                    required
+                  >
+                    <option value="">Choose Working Type</option>
+                    <option value="fixed">Fixed Timing</option>
+                    <option value="hrs">Hourly Based</option>
+                  </select>
+                </div>
+              </>
+            )}
+
             <div className="col-md-6">
-              <label className="form-label">Working Type</label>
+              <label className="form-label">Department</label>
               <select
                 className="form-select"
-                value={addUser.working_type}
-                onChange={handleWorkingTypeChange}
+                value={addUser.dept}
+                onChange={(e) => setAddUser({ ...addUser, dept: e.target.value })}
                 required
+                disabled={!selectedCategory}
               >
-                <option value="">Choose Working Type</option>
-                <option value="fixed">Fixed Timing</option>
-                <option value="hrs">Hourly Based</option>
+                <option value="">Choose Department</option>
+                {(
+                  selectedCategory === 'custom'
+                    ? (addUser.staff_type === 'Teaching Staff'
+                      ? TeachingStaff
+                      : addUser.staff_type === 'Non-Teaching Staff'
+                        ? NonTeachingStaff
+                        : [])
+                    : (categoryStaffType === 'Teaching Staff'
+                      ? TeachingStaff
+                      : categoryStaffType === 'Non-Teaching Staff'
+                        ? NonTeachingStaff
+                        : [])
+                ).map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+
               </select>
             </div>
 

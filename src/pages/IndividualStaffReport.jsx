@@ -31,7 +31,7 @@ function IndividualAttendanceTable() {
                 end_date: formData.endDate,
                 id: formData.employeeId
             });
-
+            console.log(res.data)
             const { absent_marked, total_late_mins, data, timing } = res.data;
 
             const employee = data[0] || {};
@@ -106,7 +106,7 @@ function IndividualAttendanceTable() {
 
     return (
 
-        <PageWrapper title="Attendance Report for {staffInfo.name}">
+        <PageWrapper title={`Attendance Report for ${staffInfo.name}`}>
 
             <form className="mb-4">
                 <div className="row mb-3">
@@ -149,23 +149,32 @@ function IndividualAttendanceTable() {
                             </tr>
                         </thead>
                         <tbody>
-                            {records.map((rec, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{rec.date}</td>
-
-                                    {columnsToShow.map((col, i) => (
-                                        <td key={i}>{rec[col] || '-'}</td>
-                                    ))}
-                                    <td>{rec.late_mins}</td>
-                                    <td>{rec.working_hours}</td>
+                            {records.length === 0 ? (
+                                <tr>
+                                    <td colSpan={columnsToShow.length + 4} className="text-center">
+                                        No data available
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                records.map((rec, index) => (
+                                    <tr key={index}>
+                                        <td>{index + 1}</td>
+                                        <td>{rec.date}</td>
+
+                                        {columnsToShow.map((col, i) => (
+                                            <td key={i}>{rec[col] || '-'}</td>
+                                        ))}
+                                        <td>{rec.late_mins}</td>
+                                        <td>{rec.working_hours}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </>
-            )}
-        </PageWrapper>
+            )
+            }
+        </PageWrapper >
     );
 }
 

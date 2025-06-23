@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   BrowserRouter as Router,
@@ -19,6 +19,7 @@ import LoginPage from './pages/LoginPage';
 import HRExcemptions from './pages/HRExcemptions';
 import UserManager from './pages/UserManager';
 import CategoryManager from './pages/CategoryManager'
+import CreatedByPage from './pages/CreatedBy'
 import {
   useAuth,
   AuthProvider
@@ -62,6 +63,27 @@ function AppContent() {
     logout,
     designation
   } = useAuth();
+  // ...existing code...
+  const [pendingExemptions, setPendingExemptions] = useState(0);
+
+  useEffect(() => {
+    const fetchPendingExemptions = async () => {
+      if (isAuthenticated && designation === 'HR') {
+        try {
+          const res = await import('./axios').then(m => m.default.get('/hr_exemptions_all'));
+          if (res.data && Array.isArray(res.data.exemptions)) {
+            const pending = res.data.exemptions.filter(e => e.exemptionStatus === 'pending').length;
+            setPendingExemptions(pending);
+          } else {
+            setPendingExemptions(0);
+          }
+        } catch {
+          setPendingExemptions(0);
+        }
+      }
+    };
+    fetchPendingExemptions();
+  }, [isAuthenticated, designation]);
 
   return (
     <Router>
@@ -102,9 +124,18 @@ function AppContent() {
                       </li>
                     </ul>
                   </li>
-                  <li className="nav-item">
+                  <li className="nav-item position-relative">
                     <Link className="nav-link" to="/exemptions">Exemptions</Link>
+                    {pendingExemptions > 0 && (
+                      <span
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning"
+                        style={{ fontSize: "0.6rem" }}
+                      >
+                        {pendingExemptions}
+                      </span>
+                    )}
                   </li>
+
                   <li className="nav-item dropdown"
                     style={{ position: "relative" }}
                     onMouseEnter={e => e.currentTarget.classList.add("show")}
@@ -198,6 +229,11 @@ function AppContent() {
               <CategoryManager />
             </RequireHR>
           } />
+
+          <Route path="/createdby" element={
+            <CreatedByPage />
+          } />
+
 
           <Route path="/" element={
             isAuthenticated
