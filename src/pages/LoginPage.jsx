@@ -29,7 +29,7 @@ function LoginPage() {
         if (result.designation === 'HR') {
           // navigate(from || '/view', { replace: true });
           navigate('/view', { replace: true });
-        } else if (result.designation === 'STAFF') {
+        } else if (result.designation) {
           navigate('/staffIndividualReport', { replace: true });
         } else {
           showAlert('Unknown designation. Redirecting to dashboard.', 'warning');
@@ -45,33 +45,37 @@ function LoginPage() {
   };
 
   return (
-    <PageWrapper title="Login">
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label fw-medium">User ID</label>
-          <input
-            type="text"
-            name="userId"
-            value={formData.userId}
-            onChange={handleChange}
-            className="form-control"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="form-label fw-medium">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="form-control"
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary w-100 btn-c-primary">Login</button>
-      </form>
-    </PageWrapper>
+    <div className="w-50 m-auto">
+
+      <PageWrapper title="Login">
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label fw-medium">User ID</label>
+            <input
+              type="text"
+              name="userId"
+              value={formData.userId}
+              onChange={handleChange}
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="form-label fw-medium">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="form-control"
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary w-100 btn-c-primary">Login</button>
+        </form>
+      </PageWrapper>
+    </div>
+
   );
 }
 
