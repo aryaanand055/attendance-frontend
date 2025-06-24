@@ -1,47 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../axios';
+
+import { useAlert } from '../components/AlertProvider';
 import PageWrapper from '../components/PageWrapper';
 
 function DeviceManager() {
-    const [devices, setDevices] = useState([
-        {
-            name: "Device 1",
-            ip: "192.168.1.1",
-            location: "CSE Block",
-            photo: "https://5.imimg.com/data5/SELLER/Default/2021/8/YO/BR/DA/5651309/essl-ai-face-venus-face-attendance-system-with-artificial-intelligence-500x500.jpg"
-        },
-        {
-            name: "Device 2",
-            ip: "192.168.1.2",
-            location: "Admin Office",
-            photo: "https://5.imimg.com/data5/SELLER/Default/2021/8/YO/BR/DA/5651309/essl-ai-face-venus-face-attendance-system-with-artificial-intelligence-500x500.jpg"
-        },
-        {
-            name: "Device 3",
-            ip: "192.168.1.3",
-            location: "Architecture Block",
-            photo: "https://5.imimg.com/data5/SELLER/Default/2021/8/YO/BR/DA/5651309/essl-ai-face-venus-face-attendance-system-with-artificial-intelligence-500x500.jpg"
-        }
-    ]);
-
+    const [devices, setDevices] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [editingIdx, setEditingIdx] = useState(null);
-    const [editForm, setEditForm] = useState({ name: '', ip: '', location: '', photo: '' });
+    const [editForm, setEditForm] = useState({ device_id: '', device_name: '', ip_address: '', device_location: '', image_url: '' });
+    const [addForm, setAddForm] = useState({ device_id: '', device_name: '', ip_address: '', device_location: '', image_url: '' });
 
-    // Add device form state
-    const [addForm, setAddForm] = useState({ name: '', ip: '', location: '', photo: '' });
+    const { showAlert } = useAlert();
 
-    const handleEditClick = (idx) => {
-        setEditingIdx(idx);
-        setEditForm(devices[idx]);
+    // Fetch devices from backend
+
+    useEffect(() => {
+        const fetchDevices = async () => {
+            try {
+                const res = await axios.get("/devices");
+                if (res.data.success) {
+                    setDevices(res.data.devices);
+                    setLoading(false);
+                } else {
+                    showAlert('Failed to fetch devices', 'error');
+                }
+            } catch (error) {
+                showAlert('Failed to fetch devices', 'error');
+                console.error("Error fetching devices:", error);
+            }
+        };
+        fetchDevices();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleEditClick = (deviceId) => {
+        const device = devices.find((d) => d.device_id === deviceId);
+        setEditingIdx(deviceId);
+        setEditForm({ ...device });
     };
 
     const handleFormChange = (e) => {
         setEditForm({ ...editForm, [e.target.name]: e.target.value });
     };
 
-    const handleSave = () => {
-        const updatedDevices = [...devices];
-        updatedDevices[editingIdx] = { ...editForm };
-        setDevices(updatedDevices);
+    const handleSave = async () => {
+        try {
+            const payload = {
+                id: editForm.device_id,
+                ip_address: editForm.ip_address,
+                device_name: editForm.device_name,
+                device_location: editForm.device_location,
+                image_url: editForm.image_url,
+            };
+            const res = await axios.post('/devices/update', payload);
+            if (res.data.success) {
+                const updatedDevices = devices.map((device) =>
+                    device.device_id === editForm.device_id ? { ...editForm } : device
+                );
+                setDevices(updatedDevices);
+                showAlert('Device updated successfully', 'success');
+            } else {
+                showAlert('Failed to update device', 'error');
+            }
+        } catch (error) {
+            showAlert('Failed to update device', 'error');
+            console.error('Error updating device:', error);
+        }
         setEditingIdx(null);
     };
 
@@ -49,99 +74,109 @@ function DeviceManager() {
         setEditingIdx(null);
     };
 
-    // Add device handlers
     const handleAddFormChange = (e) => {
         setAddForm({ ...addForm, [e.target.name]: e.target.value });
     };
 
-    const handleAddDevice = (e) => {
+    const handleAddDevice = async (e) => {
         e.preventDefault();
-        setDevices([...devices, { ...addForm }]);
-        setAddForm({ name: '', ip: '', location: '', photo: '' });
+        try {
+            const res = await axios.post('/devices/add', addForm);
+            if (res.data.success && res.data.device) {
+                setDevices([...devices, res.data.device]);
+            } else {
+                setDevices([...devices, addForm]); // fallback if backend doesn't return device
+            }
+            setAddForm({ device_id: '', device_name: '', ip_address: '', device_location: '', image_url: '' });
+        } catch (error) {
+            showAlert('Failed to add device', 'error');
+            console.error("Error adding device:", error);
+        }
     };
 
     return (
         <PageWrapper title="Device Manager">
-            {/* Devices View Section */}
             <div className='mb-5 p-4 rounded-3 bg-light border'>
                 <h4 className="mb-3 text-c-primary fw-bold">Devices</h4>
-                <div className="d-flex gap-3 flex-wrap mb-3">
-                    {devices.map((device, idx) => (
-                        <div key={idx} className="card shadow-sm position-relative" style={{ width: 180 }}>
-                            {/* Edit button */}
-                            <button
-                                className="position-absolute edit-c-btn"
-                                onClick={() => handleEditClick(idx)}
-                                aria-label="Edit"
-                            >
-                                <span role="img" aria-label="edit"><i className="bi bi-pencil-fill"></i></span>
-                            </button>
-                            <img
-                                src={device.photo}
-                                alt={device.name}
-                                className="card-img-top"
-                                style={{ objectFit: "cover", height: 80, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
-                            />
-                            <div className="card-body p-2">
-                                {editingIdx === idx ? (
-                                    <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
-                                        <input
-                                            className="form-control form-control-sm mb-1"
-                                            name="name"
-                                            value={editForm.name}
-                                            onChange={handleFormChange}
-                                            placeholder="Name"
-                                            required
-                                        />
-                                        <input
-                                            className="form-control form-control-sm mb-1"
-                                            name="ip"
-                                            value={editForm.ip}
-                                            onChange={handleFormChange}
-                                            placeholder="IP"
-                                            required
-                                        />
-                                        <input
-                                            className="form-control form-control-sm mb-1"
-                                            name="location"
-                                            value={editForm.location}
-                                            onChange={handleFormChange}
-                                            placeholder="Location"
-                                            required
-                                        />
-                                        <input
-                                            className="form-control form-control-sm mb-2"
-                                            name="photo"
-                                            value={editForm.photo}
-                                            onChange={handleFormChange}
-                                            placeholder="Photo URL"
-                                        />
-                                        <div className="d-flex gap-1">
-                                            <button type="submit" className="btn btn-primary btn-sm">Save</button>
-                                            <button type="button" className="btn btn-secondary btn-sm" onClick={handleCancel}>Cancel</button>
-                                        </div>
-                                    </form>
-                                ) : (
-                                    <>
-                                        <h6 className="card-title mb-1">{device.name}</h6>
-                                        <div className="small text-muted">{device.ip}</div>
-                                        <div className="small">{device.location}</div>
-                                    </>
-                                )}
+                {loading ? (
+                    <div>Loading...</div>
+                ) : (
+                    <div className="d-flex gap-3 flex-wrap mb-3">
+                        {devices.map((device, idx) => (
+                            <div key={device.device_id} className="card shadow-sm position-relative" style={{ width: 180 }}>
+                                <button
+                                    className="position-absolute edit-c-btn"
+                                    onClick={() => handleEditClick(device.device_id)}
+                                    aria-label="Edit"
+                                >
+                                    <span role="img" aria-label="edit"><i className="bi bi-pencil-fill"></i></span>
+                                </button>
+                                <img
+                                    src={device.image_url}
+                                    alt={device.device_name}
+                                    className="card-img-top"
+                                    style={{ objectFit: "cover", height: 80, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+                                />
+                                <div className="card-body p-2">
+                                    {editingIdx === device.device_id ? (
+                                        <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
+                                            <input
+                                                className="form-control form-control-sm mb-1"
+                                                name="device_name"
+                                                value={editForm.device_name}
+                                                onChange={handleFormChange}
+                                                placeholder="Name"
+                                                required
+                                            />
+                                            <input
+                                                className="form-control form-control-sm mb-1"
+                                                name="ip_address"
+                                                value={editForm.ip_address}
+                                                onChange={handleFormChange}
+                                                placeholder="IP"
+                                                required
+                                            />
+                                            <input
+                                                className="form-control form-control-sm mb-1"
+                                                name="device_location"
+                                                value={editForm.device_location}
+                                                onChange={handleFormChange}
+                                                placeholder="Location"
+                                                required
+                                            />
+                                            <input
+                                                className="form-control form-control-sm mb-2"
+                                                name="image_url"
+                                                value={editForm.image_url}
+                                                onChange={handleFormChange}
+                                                placeholder="Photo URL"
+                                            />
+                                            <div className="d-flex gap-1">
+                                                <button type="submit" className="btn btn-primary btn-sm">Save</button>
+                                                <button type="button" className="btn btn-secondary btn-sm" onClick={handleCancel}>Cancel</button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <h6 className="card-title mb-1">{device.device_name}</h6>
+                                            <div className="small text-muted">{device.ip_address}</div>
+                                            <div className="small">{device.device_location}</div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
-            {/* Add Device Section */}
             <div className='mb-5 p-4 rounded-3 bg-light border'>
                 <h4 className="mb-3 text-c-primary fw-bold">Add New Device</h4>
                 <form className="d-flex gap-2 flex-wrap align-items-end" onSubmit={handleAddDevice}>
                     <input
                         className="form-control form-control-sm"
                         style={{ maxWidth: 150 }}
-                        name="name"
-                        value={addForm.name}
+                        name="device_name"
+                        value={addForm.device_name}
                         onChange={handleAddFormChange}
                         placeholder="Name"
                         required
@@ -149,8 +184,8 @@ function DeviceManager() {
                     <input
                         className="form-control form-control-sm"
                         style={{ maxWidth: 130 }}
-                        name="ip"
-                        value={addForm.ip}
+                        name="ip_address"
+                        value={addForm.ip_address}
                         onChange={handleAddFormChange}
                         placeholder="IP"
                         required
@@ -158,8 +193,8 @@ function DeviceManager() {
                     <input
                         className="form-control form-control-sm"
                         style={{ maxWidth: 180 }}
-                        name="location"
-                        value={addForm.location}
+                        name="device_location"
+                        value={addForm.device_location}
                         onChange={handleAddFormChange}
                         placeholder="Location"
                         required
@@ -167,10 +202,10 @@ function DeviceManager() {
                     <input
                         className="form-control form-control-sm"
                         style={{ maxWidth: 220 }}
-                        name="photo"
-                        value={addForm.photo}
+                        name="image_url"
+                        value={addForm.image_url}
                         onChange={handleAddFormChange}
-                        placeholder="Photo URL"
+                        placeholder="Image URL"
                     />
                     <button type="submit" className="btn btn-success btn-sm">Add</button>
                 </form>
