@@ -147,3 +147,18 @@
   margin: 0.5rem auto;
   width: 80%;
 }
+
+.edit-c-btn {
+  position: absolute;
+  color: var(--primary);
+  top: 2%;
+  right: 2%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.edit-c-btn:hover {
+  color: var(--secondary);
+  scale: 1.05;
+}

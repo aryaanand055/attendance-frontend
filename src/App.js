@@ -20,6 +20,9 @@ import HRExcemptions from './pages/HRExcemptions';
 import UserManager from './pages/UserManager';
 import CategoryManager from './pages/CategoryManager'
 import CreatedByPage from './pages/CreatedBy'
+import DevicesManager from './pages/DevicesManager';
+import DeviceDataManager from './pages/DeviceDataManager';
+
 import {
   useAuth,
   AuthProvider
@@ -109,21 +112,24 @@ function AppContent() {
                       style={{ textDecoration: "none" }}>
                       Logs
                     </button>
+
                     <ul className="dropdown-menu show-on-hover " aria-labelledby="attendanceDropdown"
                       style={{ position: "absolute", top: "100%", left: 0, zIndex: 1000, minWidth: "10rem", display: "none" }}>
                       <li className="nav-item">
                         <Link className="dropdown-item nav-link" to="/view">Live</Link>
                       </li>
-                      <hr className='hr c-hr' />
+                      <div className="dropdown-divider"></div>
                       <li className="nav-item">
                         <Link className="dropdown-item nav-link" to="/summary">Department</Link>
                       </li>
-                      <hr className='hr c-hr' />
+                      <div className="dropdown-divider"></div>
                       <li className="nav-item">
                         <Link className="dropdown-item nav-link" to="/individual">Individual</Link>
                       </li>
                     </ul>
+
                   </li>
+
                   <li className="nav-item position-relative">
                     <Link className="nav-link" to="/exemptions">Exemptions</Link>
                     {pendingExemptions > 0 && (
@@ -150,15 +156,37 @@ function AppContent() {
                       <li className="nav-item">
                         <Link className="dropdown-item nav-link" to="/users">User</Link>
                       </li>
-                      <hr className='hr c-hr' />
+                      <div className="dropdown-divider"></div>
                       <li className="nav-item">
                         <Link className="dropdown-item nav-link" to="/categories">Category</Link>
                       </li>
                     </ul>
                   </li>
 
+                  <li className="nav-item dropdown"
+                    style={{ position: "relative" }}
+                    onMouseEnter={e => e.currentTarget.classList.add("show")}
+                    onMouseLeave={e => e.currentTarget.classList.remove("show")}>
+                    <button type="button" className="nav-link dropdown-toggle btn btn-link" id="deviceManagerDropdown"
+                      data-bs-toggle="dropdown" aria-expanded="false"
+                      style={{ textDecoration: "none" }}>
+                      Device
+                    </button>
+                    <ul className="dropdown-menu show-on-hover " aria-labelledby="deviceManagerDropdown"
+                      style={{ position: "absolute", top: "100%", left: 0, zIndex: 1000, minWidth: "10rem", display: "none" }}>
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/devicemanager">Devices Manager</Link>
+                      </li>
+                      <div className="dropdown-divider"></div>
+                      <li className="nav-item">
+                        <Link className="dropdown-item nav-link" to="/devicedata">Data Manager</Link>
+                      </li>
+                    </ul>
+                  </li>
+
                 </ul>
               }
+
               {isAuthenticated && designation !== "HR" &&
                 <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
                   <li className="nav-item">
@@ -227,6 +255,16 @@ function AppContent() {
           <Route path="/categories" element={
             <RequireHR>
               <CategoryManager />
+            </RequireHR>
+          } />
+          <Route path="/devicemanager" element={
+            <RequireHR>
+              <DevicesManager />
+            </RequireHR>
+          } />
+          <Route path="/devicedata" element={
+            <RequireHR>
+              <DeviceDataManager />
             </RequireHR>
           } />
 

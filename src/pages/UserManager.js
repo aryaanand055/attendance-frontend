@@ -232,8 +232,12 @@ function UserManager() {
                 ))}
                 <option value="custom">Custom</option>
               </select>
+              {selectedCategory === 'custom' && (
+                <div className="form-text text-primary mt-1">
+                  A new category will be created
+                </div>
+              )}
             </div>
-
 
             <div className="col-md-6">
               <label className="form-label">Designation</label>
