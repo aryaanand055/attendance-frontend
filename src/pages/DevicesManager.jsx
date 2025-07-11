@@ -81,15 +81,22 @@ function DeviceManager() {
     const handleAddDevice = async (e) => {
         e.preventDefault();
         try {
+            const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$/;
+
+            if (!ipv4Regex.test(addForm.ip_address)) {
+                showAlert('Invalid IP address format.', 'error');
+                return;
+            }
             const res = await axios.post('/devices/add', addForm);
+
             if (res.data.success && res.data.device) {
                 setDevices([...devices, res.data.device]);
+                setAddForm({ device_id: '', device_name: '', ip_address: '', device_location: '', image_url: '' });
             } else {
                 setDevices([...devices, addForm]); // fallback if backend doesn't return device
             }
-            setAddForm({ device_id: '', device_name: '', ip_address: '', device_location: '', image_url: '' });
         } catch (error) {
-            showAlert('Failed to add device', 'error');
+            showAlert(`Error: ${error.message}`, 'error');
             console.error("Error adding device:", error);
         }
     };
