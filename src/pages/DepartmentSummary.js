@@ -194,7 +194,9 @@ function DepartmentSummary() {
                                 onChange={(e) => setSelectedDept(e.target.value)}
                             >
                                 <option value="">Choose a department</option>
-                                <option value="ALL">ALL</option>
+                                {mainCategory !== 'Department Wise' && (
+                                    <option value="ALL">ALL</option>
+                                )}
                                 {getSubDepartments().map(dept => (
                                     <option key={dept} value={dept}>{dept}</option>
                                 ))}
