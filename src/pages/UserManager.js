@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../axios';
 import PageWrapper from '../components/PageWrapper';
 import { useAlert } from '../components/AlertProvider';
 
 function UserManager() {
   const { showAlert } = useAlert();
-const Departments = ['CSE', 'ECE', 'MECH', 'ADMIN', 'LIBRARY'];
+  const Departments = ['CSE', 'ECE', 'MECH', 'ADMIN', 'LIBRARY'];
 
 
   const [loading, setLoading] = useState(false);
@@ -88,10 +88,11 @@ const Departments = ['CSE', 'ECE', 'MECH', 'ADMIN', 'LIBRARY'];
       const res = await axios.get(`/get_user/${editSearchId}`);
       if (res.data.success) {
         const user = res.data.user;
+        console.log('Fetched user:', user);
         setEditUser({
           id: user.staff_id,
           name: user.name,
-          dept: user.department,
+          dept: user.dept,
           designation: user.designation,
           category: user.category.toString(),
         });
@@ -236,9 +237,9 @@ const Departments = ['CSE', 'ECE', 'MECH', 'ADMIN', 'LIBRARY'];
                 <label className="form-label">Department</label>
                 <select className="form-select" value={editUser.dept} onChange={(e) => setEditUser({ ...editUser, dept: e.target.value })} required>
                   <option value="">Choose Department</option>
-                   {Departments.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
+                  {Departments.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
                 </select>
               </div>
               <div className="col-md-6">
@@ -263,7 +264,7 @@ const Departments = ['CSE', 'ECE', 'MECH', 'ADMIN', 'LIBRARY'];
         )}
       </div>
 
-      
+
       <div className="mb-5 p-4 rounded-3 bg-light border">
         <h4 className="text-c-primary mb-3 fw-bold">Delete User</h4>
         <form onSubmit={handleDeleteUser}>

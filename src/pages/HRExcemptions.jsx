@@ -179,12 +179,43 @@ function HRExcemptions() {
         setExemptions(updated);
     };
 
-
     const downloadPDF = () => {
         const doc = new jsPDF();
-        doc.text("Exemptions", 14, 16);
+
+        const logoBase64 = 'logo.png';
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        const headerHeight = 30;
+        const footerHeight = 15;
+
+        // Draw header background
+        doc.setFillColor(230, 230, 230);
+        doc.rect(0, 0, pageWidth, headerHeight, 'F');
+
+        // Add logo
+        const logoWidth = 20;
+        const logoHeight = 20;
+        doc.addImage(logoBase64, 'PNG', 14, 5, logoWidth, logoHeight);
+
+        // Add title in center
+        const title = 'Exemptions';
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        const titleWidth = doc.getTextWidth(title);
+        doc.text(title, (pageWidth - titleWidth) / 2, 17);
+
+        // Add right text
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const rightText = 'PSG iTech';
+        const rightTextWidth = doc.getTextWidth(rightText);
+        doc.text(rightText, pageWidth - rightTextWidth - 14, 17);
+
+        // Add table
         autoTable(doc, {
-            startY: 22,
+            startY: headerHeight + 10,
             head: [[
                 "Staff ID",
                 "Type",
@@ -202,12 +233,54 @@ function HRExcemptions() {
                 (exemption.start_time && exemption.end_time)
                     ? `${exemption.start_time} - ${exemption.end_time}`
                     : "-",
-                exemption.exemptionReason === 'Other' ? `Other: ${exemption.otherReason}` : exemption.exemptionReason,
+                exemption.exemptionReason === 'Other'
+                    ? `Other: ${exemption.otherReason}`
+                    : exemption.exemptionReason,
                 exemption.exemptionStatus
             ]),
+            theme: "plain",
+            styles: {
+                fontSize: 10,
+                cellPadding: 3,
+            },
+            headStyles: {
+                fillColor: [63, 63, 149],
+                textColor: [255, 255, 255],
+            },
+            didDrawCell: function (data) {
+                const doc = data.doc;
+
+                // Only run for body rows and only once per row
+                if (data.section === 'body' && data.column.index === data.table.columns.length - 1) {
+                    const lineWidth = pageWidth * 0.85;
+                    const startX = (pageWidth - lineWidth) / 2;
+                    const y = data.cell.y + data.cell.height - 0.5;  // Adjust for better alignment
+
+                    doc.setDrawColor(150); // Black
+                    doc.setLineWidth(0.2);
+                    doc.line(startX, y, startX + lineWidth, y);
+                }
+            },
         });
-        doc.save("exemptions.pdf");
+
+        // Draw footer background
+        doc.setFillColor(230, 230, 230);
+        doc.rect(0, pageHeight - footerHeight, pageWidth, footerHeight, 'F');
+
+        // Add footer text
+        const footerText = `Generated on ${new Date().toLocaleDateString()}`;
+        doc.setFontSize(10);
+        const footerTextWidth = doc.getTextWidth(footerText);
+        doc.text(
+            footerText,
+            (pageWidth - footerTextWidth) / 2,
+            pageHeight - footerHeight / 2 + 1
+        );
+
+        // Save PDF
+        doc.save('exemptions.pdf');
     };
+
 
     return (
         <PageWrapper title="Exemptions">
