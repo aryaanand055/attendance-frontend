@@ -130,8 +130,8 @@ function HRExcemptions() {
     };
 
     const sessionOptions = [
-        { value: "1", label: "8:30 - 9:20" },
         { value: "2", label: "9:20 - 10:10" },
+        { value: "1", label: "8:30 - 9:20" },
         { value: "3", label: "10:25 - 11:15" },
         { value: "4", label: "11:15 - 12:05" },
         { value: "5", label: "13:10 - 14:00" },
@@ -160,7 +160,19 @@ function HRExcemptions() {
         const exemptionId = updated[index].exemptionId;
         console.log(`Exemption ID: ${exemptionId}, Action: ${action}`);
         if (action === "approve") {
-            const res = await axios.post("/hr_exemptions/approve", { exemptionId });
+          const exemptionData = updated[index];
+           const res = await axios.post("/hr_exemptions/approve", {
+                exemptionId,
+                staffId: exemptionData.staffId,
+                exemptionType: exemptionData.exemptionType,
+                exemptionDate: exemptionData.exemptionDate,
+                exemptionSession: exemptionData.exemptionSession,
+                start_time: exemptionData.start_time,
+                end_time: exemptionData.end_time,
+                exemptionReason: exemptionData.exemptionReason,
+                otherReason: exemptionData.otherReason,
+                exemptionStatus: 'approved'
+            });
             if (res.data.message !== "Exemption approved successfully") {
                 showAlert('Failed to approve exemption', 'error');
                 return;
