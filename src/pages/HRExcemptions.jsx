@@ -410,6 +410,7 @@ function HRExcemptions() {
                         <label htmlFor="exemptionReason" className="form-label fw-medium">Reason</label>
                         <select className="form-select" id="exemptionReason" name="exemptionReason" value={formData.exemptionReason} onChange={handleChange} required>
                             <option value="">Select Reason</option>
+                            <option value="Official">Official</option>
                             <option value="Medical">Medical</option>
                             <option value="Personal">Personal</option>
                             <option value="Family">Family Emergency</option>
